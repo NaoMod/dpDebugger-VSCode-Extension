@@ -1,0 +1,57 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "generic",
+            "request": "launch",
+            "name": "Launch Trivial State Machine",
+            "sourceFile": "${workspaceFolder}/trivial.stmch",
+            "languageServerPort": 49152,
+            "pauseOnStart": true,
+            "additionalArgs": {
+                "inputs": [
+                    "b",
+                    "a",
+                    "b"
+                ]
+            }
+        },
+        {
+            "type": "generic",
+            "request": "launch",
+            "name": "Launch Sample State Machine",
+            "sourceFile": "${workspaceFolder}/sample.stmch",
+            "languageServerPort": 49152,
+            "pauseOnStart": true,
+            "additionalArgs": {
+                "inputs": [
+                    "b",
+                    "d",
+                    "a",
+                    "b",
+                    "final"
+                ]
+            }
+        },
+        {
+            "type": "generic",
+            "request": "launch",
+            "name": "Launch Non-Deterministic State Machine",
+            "sourceFile": "${workspaceFolder}/non-deterministic.stmch",
+            "languageServerPort": 49152,
+            "pauseOnStart": true,
+            "additionalArgs": {
+                "inputs": [
+                    "a",
+                    "c",
+                    "d",
+                    "b",
+                    "a"
+                ]
+            }
+        }
+    ]
+}

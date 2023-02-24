@@ -1,0 +1,182 @@
+{
+  "name": "configurable-debugger-vscode-extension",
+  "version": "1.0.0",
+  "description": "",
+  "publisher": "naomod",
+  "engines": {
+    "vscode": "^1.63.0"
+  },
+  "main": "./out/extension.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "categories": [
+    "Debuggers"
+  ],
+  "activationEvents": [
+    "onDebugResolve:generic",
+    "onDebugDynamicConfigurations:generic",
+    "onCommand:extension.generic-debug.getProgramName",
+    "onCommand:extension.generic-debug.runEditorContents",
+    "onCommand:extension.generic-debug.debugEditorContents"
+  ],
+  "contributes": {
+    "menus": {
+      "editor/title/run": [
+        {
+          "command": "extension.generic-debug.runEditorContents",
+          "group": "navigation@1"
+        },
+        {
+          "command": "extension.generic-debug.debugEditorContents",
+          "group": "navigation@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "extension.generic-debug.debugEditorContents"
+        },
+        {
+          "command": "extension.generic-debug.runEditorContents"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "extension.generic-debug.enableBreakpointType",
+          "when": "view == domainSpecificBreakpoints && viewItem == breakpointType",
+          "group": "inline"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "extension.generic-debug.debugEditorContents",
+        "title": "Debug File",
+        "category": "Generic Debug"
+      },
+      {
+        "command": "extension.generic-debug.runEditorContents",
+        "title": "Run File",
+        "category": "Generic Debug"
+      },
+      {
+        "command": "extension.generic-debug.enableBreakpointType",
+        "title": "Enable Breakpoint Type",
+        "category": "Generic Debug",
+        "icon": {
+          "dark": "icons/add-dark.svg",
+          "light": "icons/add-light.svg"
+        }
+      }
+    ],
+    "views": {
+      "debug": [
+        {
+          "id": "domainSpecificBreakpoints",
+          "name": "Domain-Specific Breakpoints",
+          "icon": "icons/breakpoints-activate-light.svg",
+          "contextualTitle": "Debug",
+          "type": "tree",
+          "visibility": "collapsed",
+          "when": "inDebugMode"
+        }
+      ]
+    },
+    "debuggers": [
+      {
+        "type": "generic",
+        "label": "Generic Debug",
+        "program": "../debugger/out/main.js",
+        "runtime": "node",
+        "configurationAttributes": {
+          "launch": {
+            "required": [
+              "sourceFile",
+              "languageServerPort"
+            ],
+            "properties": {
+              "sourceFile": {
+                "type": "string",
+                "description": "Absolute path to a text file.",
+                "default": "${workspaceFolder}/${command:AskForProgramName}"
+              },
+              "languageServerPort": {
+                "type": "number",
+                "description": "Port on which the language server associated to the source file is listening.",
+                "default": "${workspaceFolder}/${command:AskForLanguageServerPort}"
+              },
+              "pauseOnStart": {
+                "type": "boolean",
+                "description": "True if the program should stop before executing the first step.",
+                "default": true
+              },
+              "additionalArgs": {
+                "type": "object",
+                "description": "Additional arguments that may be required for specific languages."
+              }
+            }
+          }
+        },
+        "initialConfigurations": [
+          {
+            "type": "generic",
+            "request": "launch",
+            "name": "Ask for file name",
+            "sourceFile": "${workspaceFolder}/${command:AskForProgramName}",
+            "languageServerPort": "${workspaceFolder}/${command:AskForLanguageServerPort}"
+          }
+        ],
+        "configurationSnippets": [
+          {
+            "label": "Generic Debug: Launch",
+            "description": "A new configuration for launching a generic debug program",
+            "body": {
+              "type": "generic",
+              "request": "launch",
+              "name": "${2:Launch Program}",
+              "sourceFile": "^\"\\${workspaceFolder}/${command:AskForProgramName}\"",
+              "languageServerPort": "^\"\\${workspaceFolder}/${command:AskForLanguageServerPort}\""
+            }
+          }
+        ],
+        "variables": {
+          "AskForProgramName": "extension.generic-debug.getProgramName",
+          "AskForLanguageServerPort": "extension.generic-debug.getLanguageServerPort"
+        }
+      }
+    ],
+    "languages": [
+      {
+        "id": "stateMachine",
+        "aliases": [
+          "State Machine"
+        ],
+        "extensions": [
+          ".stmch"
+        ]
+      }
+    ],
+    "breakpoints": [
+      {
+        "language": "stateMachine"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "stateMachine",
+        "scopeName": "source.stateMachine",
+        "path": "./syntaxes/stateMachine.tmGrammar.json"
+      }
+    ]
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "14.x",
+    "@types/vscode": "^1.63.0",
+    "@vscode/test-electron": "^2.0.3",
+    "typescript": "^4.5.4"
+  },
+  "dependencies": {
+    "jayson": "^4.0.0"
+  }
+}

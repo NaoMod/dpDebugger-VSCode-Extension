@@ -1,0 +1,30 @@
+StateMachine NonDeterministic {
+    INITIAL -> A;
+
+    state A {
+        -> B ['a'];
+        -> E ['a'];
+    }
+
+    composite state B {
+        -> A ['b'];
+        -> E ['b'];
+        -> FINAL ['final'];
+
+        INITIAL -> C;
+
+        state C {
+            -> D ['c'];
+            -> C ['c'];
+        }
+
+        state D {
+            -> C ['d'];
+        }
+        
+    }
+
+    state E {
+        -> A ['e'];
+    }
+}

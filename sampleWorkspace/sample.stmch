@@ -1,0 +1,22 @@
+StateMachine SampleMachine {
+    INITIAL -> A;
+
+    state A {
+        -> B ['b' / 'aTOb'];
+    }
+
+    composite state B {
+        -> A ['a' / 'bTOa'];
+        -> FINAL ['final' / 'bTOfinal'];
+
+        INITIAL -> C;
+
+        state C {
+            -> D ['d' / 'cTOd'];
+        }
+
+        state D {
+            -> C ['c' / 'dTOc'];
+        }
+    }
+}

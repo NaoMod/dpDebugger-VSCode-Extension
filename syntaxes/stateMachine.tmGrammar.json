@@ -1,0 +1,12 @@
+{
+    "scopeName": "source.stateMachine",
+    "fileTypes": [
+        "stmc"
+    ],
+    "patterns": [
+        {
+            "name": "keyword.control.stateMachine",
+            "match": "\\b(StateMachine|state|composite state|INITIAL|FINAL)\\b"
+        }
+    ]
+}
