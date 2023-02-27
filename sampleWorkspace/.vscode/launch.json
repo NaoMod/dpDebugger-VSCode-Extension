@@ -7,21 +7,6 @@
         {
             "type": "generic",
             "request": "launch",
-            "name": "Launch Trivial State Machine",
-            "sourceFile": "${workspaceFolder}/trivial.stmch",
-            "languageServerPort": 49152,
-            "pauseOnStart": true,
-            "additionalArgs": {
-                "inputs": [
-                    "b",
-                    "a",
-                    "b"
-                ]
-            }
-        },
-        {
-            "type": "generic",
-            "request": "launch",
             "name": "Launch Sample State Machine",
             "sourceFile": "${workspaceFolder}/sample.stmch",
             "languageServerPort": 49152,
@@ -39,17 +24,24 @@
         {
             "type": "generic",
             "request": "launch",
-            "name": "Launch Non-Deterministic State Machine",
-            "sourceFile": "${workspaceFolder}/non-deterministic.stmch",
+            "name": "Launch Telephone State Machine",
+            "sourceFile": "${workspaceFolder}/telephone.stmch",
             "languageServerPort": 49152,
             "pauseOnStart": true,
             "additionalArgs": {
                 "inputs": [
-                    "a",
-                    "c",
-                    "d",
-                    "b",
-                    "a"
+                    "liftReceiver",
+                    "after",
+                    "callerHangsUp",
+                    "liftReceiver",
+                    "dialDigit",
+                    "dialDigitIncomplete",
+                    "dialDigitValid",
+                    "connected",
+                    "calleeAnswers",
+                    "calleeHangsUp",
+                    "calleeAnswers",
+                    "terminate"
                 ]
             }
         }
