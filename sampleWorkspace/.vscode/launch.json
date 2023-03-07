@@ -9,7 +9,8 @@
             "request": "launch",
             "name": "Launch Sample State Machine",
             "sourceFile": "${workspaceFolder}/sample.stmch",
-            "languageServerPort": 49152,
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "additionalArgs": {
                 "inputs": [
@@ -26,7 +27,8 @@
             "request": "launch",
             "name": "Launch Telephone State Machine",
             "sourceFile": "${workspaceFolder}/telephone.stmch",
-            "languageServerPort": 49152,
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "additionalArgs": {
                 "inputs": [

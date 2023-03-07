@@ -15,31 +15,10 @@
   ],
   "activationEvents": [
     "onDebugResolve:generic",
-    "onDebugDynamicConfigurations:generic",
-    "onCommand:extension.generic-debug.getProgramName",
-    "onCommand:extension.generic-debug.runEditorContents",
-    "onCommand:extension.generic-debug.debugEditorContents"
+    "onDebugDynamicConfigurations:generic"
   ],
   "contributes": {
     "menus": {
-      "editor/title/run": [
-        {
-          "command": "extension.generic-debug.runEditorContents",
-          "group": "navigation@1"
-        },
-        {
-          "command": "extension.generic-debug.debugEditorContents",
-          "group": "navigation@2"
-        }
-      ],
-      "commandPalette": [
-        {
-          "command": "extension.generic-debug.debugEditorContents"
-        },
-        {
-          "command": "extension.generic-debug.runEditorContents"
-        }
-      ],
       "view/item/context": [
         {
           "command": "extension.generic-debug.enableBreakpointType",
@@ -49,16 +28,6 @@
       ]
     },
     "commands": [
-      {
-        "command": "extension.generic-debug.debugEditorContents",
-        "title": "Debug File",
-        "category": "Generic Debug"
-      },
-      {
-        "command": "extension.generic-debug.runEditorContents",
-        "title": "Run File",
-        "category": "Generic Debug"
-      },
       {
         "command": "extension.generic-debug.enableBreakpointType",
         "title": "Enable Breakpoint Type",
@@ -92,18 +61,23 @@
           "launch": {
             "required": [
               "sourceFile",
-              "languageServerPort"
+              "languageRuntimePort"
             ],
             "properties": {
               "sourceFile": {
                 "type": "string",
                 "description": "Absolute path to a text file.",
-                "default": "${workspaceFolder}/${command:AskForProgramName}"
+                "default": "${workspaceFolder}/"
               },
-              "languageServerPort": {
+              "configurableDebuggerPort": {
                 "type": "number",
-                "description": "Port on which the language server associated to the source file is listening.",
-                "default": "${workspaceFolder}/${command:AskForLanguageServerPort}"
+                "description": "Port on which the configurable debugger is listening.",
+                "default": 49153
+              },
+              "languageRuntimePort": {
+                "type": "number",
+                "description": "Port on which the language runtime associated to the source file is listening.",
+                "default": 49152
               },
               "pauseOnStart": {
                 "type": "boolean",
@@ -121,9 +95,12 @@
           {
             "type": "generic",
             "request": "launch",
-            "name": "Ask for file name",
-            "sourceFile": "${workspaceFolder}/${command:AskForProgramName}",
-            "languageServerPort": "${workspaceFolder}/${command:AskForLanguageServerPort}"
+            "name": "Launch Program",
+            "sourceFile": "${workspaceFolder}/",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "additionalArgs": {}
           }
         ],
         "configurationSnippets": [
@@ -134,15 +111,14 @@
               "type": "generic",
               "request": "launch",
               "name": "${2:Launch Program}",
-              "sourceFile": "^\"\\${workspaceFolder}/${command:AskForProgramName}\"",
-              "languageServerPort": "^\"\\${workspaceFolder}/${command:AskForLanguageServerPort}\""
+              "sourceFile": "^\"\\${workspaceFolder}/\"",
+              "configurableDebuggerPort": 49153,
+              "languageRuntimePort": 49152,
+              "pauseOnStart": true,
+              "additionalArgs": {}
             }
           }
-        ],
-        "variables": {
-          "AskForProgramName": "extension.generic-debug.getProgramName",
-          "AskForLanguageServerPort": "extension.generic-debug.getLanguageServerPort"
-        }
+        ]
       }
     ],
     "languages": [

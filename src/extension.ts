@@ -8,7 +8,7 @@ import { activateDebug } from "./activateDebug";
  * @param context {vscode.ExtensionContext}
  */
 export async function activate(context: ExtensionContext) {
-    activateDebug(context, new GenericDebugAdapterServerDescriptorFactory(49153));
+    activateDebug(context, new GenericDebugAdapterServerDescriptorFactory());
 }
 
 /**
@@ -27,14 +27,8 @@ export interface DisposableDebugAdapterDescriptorFactory extends vscode.DebugAda
  */
 class GenericDebugAdapterServerDescriptorFactory implements DisposableDebugAdapterDescriptorFactory {
 
-    private debuggerPort: number;
-
-    constructor(debuggerPort: number) {
-        this.debuggerPort = debuggerPort;
-    }
-
     createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-        return new vscode.DebugAdapterServer(this.debuggerPort);
+        return new vscode.DebugAdapterServer(session.configuration.configurableDebuggerPort);
     }
 
     dispose() { }
