@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { DisposableDebugAdapterDescriptorFactory } from './extension';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
-import { GenericDebugAdapterTrackerFactory } from './trackers';
+import { ConfigurableDebugAdapterTrackerFactory } from './trackers';
 
 // Stores the ids of the currently enabled breakpoint types
 const enabledBreakpointTypeIds: Set<string> = new Set();
@@ -12,7 +11,7 @@ const enabledBreakpointTypeIds: Set<string> = new Set();
  * @param context
  * @param factory
  */
-export function activateDebug(context: vscode.ExtensionContext, factory: DisposableDebugAdapterDescriptorFactory) {
+export function activateDebug(context: vscode.ExtensionContext, factory: vscode.DebugAdapterDescriptorFactory) {
     registerCommands(context);
     registerTrackers(context);
 
@@ -25,8 +24,7 @@ export function activateDebug(context: vscode.ExtensionContext, factory: Disposa
 
     registerListeners(context, domainSpecificBreakpointsProvider);
 
-    context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('generic', factory));
-    context.subscriptions.push(factory);
+    context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
 }
 
 /**
@@ -38,23 +36,23 @@ function registerCommands(context: vscode.ExtensionContext) {
     context.subscriptions.push(
 
         // Asks the user for a program name
-        vscode.commands.registerCommand('extension.generic-debug.getProgramName', () => {
+        vscode.commands.registerCommand('extension.configurable-debug.getProgramName', () => {
             return vscode.window.showInputBox({
                 placeHolder: 'Please enter the name of a text file in the workspace folder.'
             });
         }),
 
         // Asks the user for a port
-        vscode.commands.registerCommand('extension.generic-debug.getLanguageServerPort', async () => {
-            var languageServerPortString: string | undefined = await vscode.window.showInputBox({
-                placeHolder: 'Please enter the port of the language server for the selected file.'
+        vscode.commands.registerCommand('extension.configurable-debug.getLanguageRuntimePort', async () => {
+            var languageRuntimePortString: string | undefined = await vscode.window.showInputBox({
+                placeHolder: 'Please enter the port of the language runtime for the selected file.'
             });
 
-            return languageServerPortString ? languageServerPortString : undefined;
+            return languageRuntimePortString ? languageRuntimePortString : undefined;
         }),
 
         // Runs the currently opened file
-        vscode.commands.registerCommand('extension.generic-debug.runEditorContents', async (resource: vscode.Uri) => {
+        vscode.commands.registerCommand('extension.configurable-debug.runEditorContents', async (resource: vscode.Uri) => {
             let targetResource = resource;
             if (!targetResource && vscode.window.activeTextEditor) {
                 targetResource = vscode.window.activeTextEditor.document.uri;
@@ -62,15 +60,15 @@ function registerCommands(context: vscode.ExtensionContext) {
 
             if (!targetResource) return;
 
-            var languageServerPort: number | undefined = await vscode.commands.executeCommand('extension.generic-debug.getLanguageServerPort');
-            if (!languageServerPort) return;
+            var languageRuntimePort: number | undefined = await vscode.commands.executeCommand('extension.configurable-debug.getLanguageRuntimePort');
+            if (!languageRuntimePort) return;
 
             vscode.debug.startDebugging(undefined, {
-                type: 'generic',
+                type: 'configurable',
                 name: 'Run File',
                 request: 'launch',
                 sourceFile: targetResource.fsPath,
-                languageServerPort: languageServerPort,
+                languageServerPort: languageRuntimePort,
                 languageId: (await vscode.workspace.openTextDocument(targetResource)).languageId
             },
                 { noDebug: true }
@@ -78,7 +76,7 @@ function registerCommands(context: vscode.ExtensionContext) {
         }),
 
         // Debugs the currently opened file
-        vscode.commands.registerCommand('extension.generic-debug.debugEditorContents', async (resource: vscode.Uri) => {
+        vscode.commands.registerCommand('extension.configurable-debug.debugEditorContents', async (resource: vscode.Uri) => {
             let targetResource = resource;
             if (!targetResource && vscode.window.activeTextEditor) {
                 targetResource = vscode.window.activeTextEditor.document.uri;
@@ -86,28 +84,28 @@ function registerCommands(context: vscode.ExtensionContext) {
 
             if (!targetResource) return;
 
-            var languageServerPort: number | undefined = await vscode.commands.executeCommand('extension.generic-debug.getLanguageServerPort');
-            if (!languageServerPort) return;
+            var languageRuntimePort: number | undefined = await vscode.commands.executeCommand('extension.configurable-debug.getLanguageRuntimePort');
+            if (!languageRuntimePort) return;
 
             vscode.debug.startDebugging(undefined, {
-                type: 'generic',
+                type: 'configurable',
                 name: 'Debug File',
                 request: 'launch',
                 sourceFile: targetResource.fsPath,
-                languageServerPort: languageServerPort,
+                languageServerPort: languageRuntimePort,
                 languageId: (await vscode.workspace.openTextDocument(targetResource)).languageId,
                 pauseOnStart: true
             });
         }),
 
-        vscode.commands.registerCommand('extension.generic-debug.enableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
+        vscode.commands.registerCommand('extension.configurable-debug.enableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
             enabledBreakpointTypeIds.add(breakpointType.typeId);
             await vscode.debug.activeDebugSession?.customRequest('enableBreakpointTypes', { breakpointTypeIds: Array.from(enabledBreakpointTypeIds) });
 
             breakpointType.refresh();
         }),
 
-        vscode.commands.registerCommand('extension.generic-debug.disableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
+        vscode.commands.registerCommand('extension.configurable-debug.disableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
             enabledBreakpointTypeIds.delete(breakpointType.typeId);
             await vscode.debug.activeDebugSession?.customRequest('enableBreakpointTypes', { breakpointTypeIds: Array.from(enabledBreakpointTypeIds) });
 
@@ -120,7 +118,7 @@ function registerCommands(context: vscode.ExtensionContext) {
 function registerTrackers(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         // Logging
-        vscode.debug.registerDebugAdapterTrackerFactory('generic', new GenericDebugAdapterTrackerFactory())
+        vscode.debug.registerDebugAdapterTrackerFactory('configurable', new ConfigurableDebugAdapterTrackerFactory())
     );
 }
 

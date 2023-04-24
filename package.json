@@ -14,19 +14,19 @@
     "Debuggers"
   ],
   "activationEvents": [
-    "onDebugResolve:generic",
-    "onDebugDynamicConfigurations:generic"
+    "onDebugResolve:configurable",
+    "onDebugDynamicConfigurations:configurable"
   ],
   "contributes": {
     "menus": {
       "view/item/context": [
         {
-          "command": "extension.generic-debug.enableBreakpointType",
+          "command": "extension.configurable-debug.enableBreakpointType",
           "when": "view == domainSpecificBreakpoints && viewItem == disabledBreakpointType",
           "group": "inline"
         },
         {
-          "command": "extension.generic-debug.disableBreakpointType",
+          "command": "extension.configurable-debug.disableBreakpointType",
           "when": "view == domainSpecificBreakpoints && viewItem == enabledBreakpointType",
           "group": "inline"
         }
@@ -34,18 +34,18 @@
     },
     "commands": [
       {
-        "command": "extension.generic-debug.enableBreakpointType",
+        "command": "extension.configurable-debug.enableBreakpointType",
         "title": "Enable Breakpoint Type",
-        "category": "Generic Debug",
+        "category": "Configurable Debug",
         "icon": {
           "dark": "icons/add-dark.svg",
           "light": "icons/add-light.svg"
         }
       },
       {
-        "command": "extension.generic-debug.disableBreakpointType",
+        "command": "extension.configurable-debug.disableBreakpointType",
         "title": "Disable Breakpoint Type",
-        "category": "Generic Debug",
+        "category": "Configurable Debug",
         "icon": {
           "dark": "icons/remove-dark.svg",
           "light": "icons/remove-light.svg"
@@ -67,8 +67,8 @@
     },
     "debuggers": [
       {
-        "type": "generic",
-        "label": "Generic Debug",
+        "type": "configurable",
+        "label": "Configurable Debug",
         "program": "../debugger/out/main.js",
         "runtime": "node",
         "configurationAttributes": {
@@ -107,7 +107,7 @@
         },
         "initialConfigurations": [
           {
-            "type": "generic",
+            "type": "configurable",
             "request": "launch",
             "name": "Launch Program",
             "sourceFile": "${workspaceFolder}/",
@@ -119,10 +119,10 @@
         ],
         "configurationSnippets": [
           {
-            "label": "Generic Debug: Launch",
-            "description": "A new configuration for launching a generic debug program",
+            "label": "Configurable Debug: Launch",
+            "description": "A new configuration for launching a configurable debug program",
             "body": {
-              "type": "generic",
+              "type": "configurable",
               "request": "launch",
               "name": "${2:Launch Program}",
               "sourceFile": "^\"\\${workspaceFolder}/\"",

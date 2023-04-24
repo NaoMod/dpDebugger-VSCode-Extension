@@ -1,18 +1,18 @@
 import * as vscode from 'vscode';
 
 /**
- * Factory for {@link GenericDebugAdapterTracker}.
+ * Factory for {@link ConfigurableDebugAdapterTracker}.
  */
-export class GenericDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
+export class ConfigurableDebugAdapterTrackerFactory implements vscode.DebugAdapterTrackerFactory {
     createDebugAdapterTracker(session: vscode.DebugSession): vscode.ProviderResult<vscode.DebugAdapterTracker> {
-        return new GenericDebugAdapterTracker();
+        return new ConfigurableDebugAdapterTracker();
     }
 }
 
 /**
  * Listener for debug adapter messages.
  */
-export class GenericDebugAdapterTracker implements vscode.DebugAdapterTracker {
+export class ConfigurableDebugAdapterTracker implements vscode.DebugAdapterTracker {
 
     onDidSendMessage(message: any): void {
         console.error('>> Message sent by debugger:');
