@@ -22,7 +22,12 @@
       "view/item/context": [
         {
           "command": "extension.generic-debug.enableBreakpointType",
-          "when": "view == domainSpecificBreakpoints && viewItem == breakpointType",
+          "when": "view == domainSpecificBreakpoints && viewItem == disabledBreakpointType",
+          "group": "inline"
+        },
+        {
+          "command": "extension.generic-debug.disableBreakpointType",
+          "when": "view == domainSpecificBreakpoints && viewItem == enabledBreakpointType",
           "group": "inline"
         }
       ]
@@ -35,6 +40,15 @@
         "icon": {
           "dark": "icons/add-dark.svg",
           "light": "icons/add-light.svg"
+        }
+      },
+      {
+        "command": "extension.generic-debug.disableBreakpointType",
+        "title": "Disable Breakpoint Type",
+        "category": "Generic Debug",
+        "icon": {
+          "dark": "icons/remove-dark.svg",
+          "light": "icons/remove-light.svg"
         }
       }
     ],

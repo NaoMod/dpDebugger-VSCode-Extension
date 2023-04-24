@@ -15,5 +15,5 @@ export interface BreakpointType {
 }
 
 export interface EnableBreakpointTypeArgs extends Arguments {
-    breakpointTypeId: string;
+    breakpointTypeIds: string[];
 }
