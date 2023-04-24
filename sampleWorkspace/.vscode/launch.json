@@ -5,7 +5,7 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "generic",
+            "type": "configurable",
             "request": "launch",
             "name": "Launch Sample State Machine",
             "sourceFile": "${workspaceFolder}/sample.stmch",
@@ -23,7 +23,7 @@
             }
         },
         {
-            "type": "generic",
+            "type": "configurable",
             "request": "launch",
             "name": "Launch Telephone State Machine",
             "sourceFile": "${workspaceFolder}/telephone.stmch",
