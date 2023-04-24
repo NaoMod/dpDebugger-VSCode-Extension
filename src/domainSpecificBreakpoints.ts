@@ -3,7 +3,7 @@ import { BreakpointType, GetBreakpointTypesResponse } from './DAPExtension';
 
 export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvider<DomainSpecificBreakpointsTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
-    readonly onDidChangeTreeData?: vscode.Event<void | DomainSpecificBreakpointsTreeItem | DomainSpecificBreakpointsTreeItem[] | null | undefined> | undefined = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData?: vscode.Event<void | DomainSpecificBreakpointsTreeItem | DomainSpecificBreakpointsTreeItem[] | null | undefined> = this._onDidChangeTreeData.event;
 
     public async getChildren(element?: DomainSpecificBreakpointsTreeItem | undefined): Promise<vscode.ProviderResult<DomainSpecificBreakpointsTreeItem[]>> {
         if (element) return element.getChildren();
@@ -53,7 +53,7 @@ export abstract class DomainSpecificBreakpointsTreeItem extends vscode.TreeItem 
         this.provider = provider;
     }
 
-    abstract getChildren(): DomainSpecificBreakpointsTreeItem[] | null | undefined;
+    abstract getChildren(): DomainSpecificBreakpointsTreeItemChildren;
 
     public refresh(): void {
         this.provider.refresh(undefined);
@@ -69,7 +69,7 @@ export class DomainSpecificBreakpointTypeFolderTreeItem extends DomainSpecificBr
         this.breakpointTypes = breakpointTypes;
     }
 
-    public getChildren(): DomainSpecificBreakpointsTreeItem[] | null | undefined {
+    public getChildren(): DomainSpecificBreakpointsTreeItemChildren {
         return this.breakpointTypes;
     }
 }
@@ -87,7 +87,9 @@ export class DomainSpecificBreakpointTypeTreeItem extends DomainSpecificBreakpoi
         this.contextValue = isEnabled ? 'enabledBreakpointType' : 'disabledBreakpointType';
     }
 
-    public getChildren(): DomainSpecificBreakpointsTreeItem[] | null | undefined {
+    public getChildren(): DomainSpecificBreakpointsTreeItemChildren {
         return undefined;
     }
 }
+
+type DomainSpecificBreakpointsTreeItemChildren = DomainSpecificBreakpointTypeTreeItem[] | null | undefined;
