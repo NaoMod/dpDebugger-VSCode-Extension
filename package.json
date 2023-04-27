@@ -98,6 +98,10 @@
                 "description": "True if the program should stop before executing the first step.",
                 "default": true
               },
+              "enabledBreakpointTypeIds": {
+                "type": "array",
+                "description": "Enabled breakpoint types at the start of execution."
+              },
               "additionalArgs": {
                 "type": "object",
                 "description": "Additional arguments that may be required for specific languages."
@@ -129,6 +133,7 @@
               "configurableDebuggerPort": 49153,
               "languageRuntimePort": 49152,
               "pauseOnStart": true,
+              "enabledBreakpointTypeIds": [],
               "additionalArgs": {}
             }
           }

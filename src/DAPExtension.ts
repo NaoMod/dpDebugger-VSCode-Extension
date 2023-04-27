@@ -14,6 +14,6 @@ export interface BreakpointType {
     isEnabled: boolean;
 }
 
-export interface EnableBreakpointTypeArgs extends Arguments {
+export interface EnableBreakpointTypesArgs extends Arguments {
     breakpointTypeIds: string[];
 }
