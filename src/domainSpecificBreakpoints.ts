@@ -4,6 +4,9 @@ import { BreakpointType, GetBreakpointTypesResponse } from './DAPExtension';
 export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvider<DomainSpecificBreakpointsTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
     readonly onDidChangeTreeData?: vscode.Event<void | DomainSpecificBreakpointsTreeItem | DomainSpecificBreakpointsTreeItem[] | null | undefined> = this._onDidChangeTreeData.event;
+    
+    // Stores the ids of the currently enabled breakpoint types
+    enabledBreakpointTypeIds: Set<string> = new Set();
 
     public async getChildren(element?: DomainSpecificBreakpointsTreeItem | undefined): Promise<vscode.ProviderResult<DomainSpecificBreakpointsTreeItem[]>> {
         if (element) return element.getChildren();
@@ -14,6 +17,7 @@ export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvide
 
         const response: GetBreakpointTypesResponse = await vscode.debug.activeDebugSession?.customRequest('getBreakpointTypes');
         const breakpointTypes: BreakpointType[] = response.breakpointTypes;
+        this.enabledBreakpointTypeIds = new Set(breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => breakpointType.id));
 
         return [
             new DomainSpecificBreakpointTypeFolderTreeItem('Enabled', breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(

@@ -2,9 +2,6 @@ import * as vscode from 'vscode';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
 import { ConfigurableDebugAdapterTrackerFactory } from './trackers';
 
-// Stores the ids of the currently enabled breakpoint types
-const enabledBreakpointTypeIds: Set<string> = new Set();
-
 /**
  * Activates the debug extension.
  * 
@@ -12,17 +9,18 @@ const enabledBreakpointTypeIds: Set<string> = new Set();
  * @param factory
  */
 export function activateDebug(context: vscode.ExtensionContext, factory: vscode.DebugAdapterDescriptorFactory) {
-    registerCommands(context);
-    registerTrackers(context);
+
 
     const domainSpecificBreakpointsProvider: DomainSpecificBreakpointsProvider = new DomainSpecificBreakpointsProvider();
     const dataProviderDescriptions: DataProviderDescription[] = [{
         viewId: 'domainSpecificBreakpoints',
         dataProvider: domainSpecificBreakpointsProvider
     }];
-    registerDataProviders(context, dataProviderDescriptions);
 
+    registerDataProviders(context, dataProviderDescriptions);
+    registerCommands(context, domainSpecificBreakpointsProvider);
     registerListeners(context, domainSpecificBreakpointsProvider);
+    registerTrackers(context);
 
     context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
 }
@@ -32,17 +30,19 @@ export function activateDebug(context: vscode.ExtensionContext, factory: vscode.
  * 
  * @param context
  */
-function registerCommands(context: vscode.ExtensionContext) {
+function registerCommands(context: vscode.ExtensionContext, domainSpecificBreakpointsProvider: DomainSpecificBreakpointsProvider) {
     context.subscriptions.push(
         vscode.commands.registerCommand('extension.configurable-debug.enableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
-            enabledBreakpointTypeIds.add(breakpointType.typeId);
+            const enabledBreakpointTypeIds: Set<string> = new Set(domainSpecificBreakpointsProvider.enabledBreakpointTypeIds).add(breakpointType.typeId);
             await vscode.debug.activeDebugSession?.customRequest('enableBreakpointTypes', { breakpointTypeIds: Array.from(enabledBreakpointTypeIds) });
 
             breakpointType.refresh();
         }),
 
         vscode.commands.registerCommand('extension.configurable-debug.disableBreakpointType', async (breakpointType: DomainSpecificBreakpointTypeTreeItem) => {
+            const enabledBreakpointTypeIds: Set<string> = new Set(domainSpecificBreakpointsProvider.enabledBreakpointTypeIds);
             enabledBreakpointTypeIds.delete(breakpointType.typeId);
+
             await vscode.debug.activeDebugSession?.customRequest('enableBreakpointTypes', { breakpointTypeIds: Array.from(enabledBreakpointTypeIds) });
 
             breakpointType.refresh();
