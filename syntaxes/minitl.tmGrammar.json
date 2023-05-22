@@ -1,0 +1,12 @@
+{
+    "scopeName": "source.transformation",
+    "fileTypes": [
+        "minitl"
+    ],
+    "patterns": [
+        {
+            "name": "keyword.control.minitl",
+            "match": "\\b(transformation|inputMetamodel|outputMetamodel|rule|from|to)\\b"
+        }
+    ]
+}

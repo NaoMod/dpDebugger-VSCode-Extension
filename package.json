@@ -149,11 +149,23 @@
         "extensions": [
           ".stmch"
         ]
+      },
+      {
+        "id": "minitl",
+        "aliases": [
+          "MiniTL"
+        ],
+        "extensions": [
+          ".minitl"
+        ]
       }
     ],
     "breakpoints": [
       {
         "language": "stateMachine"
+      },
+      {
+        "language": "minitl"
       }
     ],
     "grammars": [
@@ -161,6 +173,11 @@
         "language": "stateMachine",
         "scopeName": "source.stateMachine",
         "path": "./syntaxes/stateMachine.tmGrammar.json"
+      },
+      {
+        "language": "minitl",
+        "scopeName": "source.transformation",
+        "path": "./syntaxes/minitl.tmGrammar.json"
       }
     ]
   },

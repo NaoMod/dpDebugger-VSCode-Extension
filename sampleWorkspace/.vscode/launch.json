@@ -7,6 +7,20 @@
         {
             "type": "configurable",
             "request": "launch",
+            "name": "Launch Sample MiniTL transfo",
+            "sourceFile": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/simpleAtoB.minitl",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "enabledBreakpointTypeIds": [],
+            "additionalArgs": {
+                "inputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/input/modelA.xmi",
+                "outputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/output/modelB.xmi"
+            }
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
             "name": "Launch Sample State Machine",
             "sourceFile": "${workspaceFolder}/sample.stmch",
             "configurableDebuggerPort": 49153,
