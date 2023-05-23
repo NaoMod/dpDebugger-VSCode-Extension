@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { BreakpointType, GetBreakpointTypesResponse } from './DAPExtension';
+import { BreakpointType, GetBreakpointTypesResponse } from './dapExtension';
 
 export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvider<DomainSpecificBreakpointsTreeItem> {
     private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
