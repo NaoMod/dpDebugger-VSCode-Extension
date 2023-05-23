@@ -1,6 +1,5 @@
 import * as vscode from 'vscode';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
-import { ConfigurableDebugAdapterTrackerFactory } from './trackers';
 
 /**
  * Activates the debug extension.
@@ -9,7 +8,6 @@ import { ConfigurableDebugAdapterTrackerFactory } from './trackers';
  * @param factory
  */
 export function activateDebug(context: vscode.ExtensionContext, factory: vscode.DebugAdapterDescriptorFactory) {
-
 
     const domainSpecificBreakpointsProvider: DomainSpecificBreakpointsProvider = new DomainSpecificBreakpointsProvider();
     const dataProviderDescriptions: DataProviderDescription[] = [{
@@ -20,7 +18,6 @@ export function activateDebug(context: vscode.ExtensionContext, factory: vscode.
     registerDataProviders(context, dataProviderDescriptions);
     registerCommands(context, domainSpecificBreakpointsProvider);
     registerListeners(context, domainSpecificBreakpointsProvider);
-    registerTrackers(context);
 
     context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
 }
@@ -49,15 +46,6 @@ function registerCommands(context: vscode.ExtensionContext, domainSpecificBreakp
         })
     );
 }
-
-
-function registerTrackers(context: vscode.ExtensionContext) {
-    context.subscriptions.push(
-        // Logging
-        vscode.debug.registerDebugAdapterTrackerFactory('configurable', new ConfigurableDebugAdapterTrackerFactory())
-    );
-}
-
 
 /**
  * Registers data providers for all views provided by the extension.
