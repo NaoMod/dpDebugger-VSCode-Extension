@@ -29,6 +29,11 @@
           "command": "extension.configurable-debug.disableBreakpointType",
           "when": "view == domainSpecificBreakpoints && viewItem == enabledBreakpointType",
           "group": "inline"
+        },
+        {
+          "command": "extension.configurable-debug.enableSteppingMode",
+          "when": "view == steppingModes && viewItem == disabledSteppingMode",
+          "group": "inline"
         }
       ]
     },
@@ -50,6 +55,15 @@
           "dark": "icons/remove-dark.svg",
           "light": "icons/remove-light.svg"
         }
+      },
+      {
+        "command": "extension.configurable-debug.enableSteppingMode",
+        "title": "Enable Stepping Mode",
+        "category": "Configurable Debug",
+        "icon": {
+          "dark": "icons/add-dark.svg",
+          "light": "icons/add-light.svg"
+        }
       }
     ],
     "views": {
@@ -58,6 +72,14 @@
           "id": "domainSpecificBreakpoints",
           "name": "Domain-Specific Breakpoints",
           "icon": "icons/breakpoints-activate-light.svg",
+          "contextualTitle": "Debug",
+          "type": "tree",
+          "visibility": "collapsed",
+          "when": "inDebugMode"
+        },
+        {
+          "id": "steppingModes",
+          "name": "Stepping Modes",
           "contextualTitle": "Debug",
           "type": "tree",
           "visibility": "collapsed",

@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
-import { BreakpointType, GetBreakpointTypesResponse } from './dapExtension';
+import { BreakpointType, GetBreakpointTypesResponse } from './DAPExtension';
+import { FolderTreeItem, LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
 
-export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvider<DomainSpecificBreakpointsTreeItem> {
-    private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
-    readonly onDidChangeTreeData?: vscode.Event<void | DomainSpecificBreakpointsTreeItem | DomainSpecificBreakpointsTreeItem[] | null | undefined> = this._onDidChangeTreeData.event;
-    
+/**
+ * Data provider for the domain-specific breakpoints view.
+ */
+export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     // Stores the ids of the currently enabled breakpoint types
-    enabledBreakpointTypeIds: Set<string> = new Set();
+    private _enabledBreakpointTypesIds: Set<string> = new Set();
 
-    public async getChildren(element?: DomainSpecificBreakpointsTreeItem | undefined): Promise<vscode.ProviderResult<DomainSpecificBreakpointsTreeItem[]>> {
+    public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
         if (element) return element.getChildren();
 
         while (!vscode.debug.activeDebugSession) await new Promise<void>(resolve => setTimeout(() => {
@@ -17,7 +18,7 @@ export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvide
 
         const response: GetBreakpointTypesResponse = await vscode.debug.activeDebugSession?.customRequest('getBreakpointTypes');
         const breakpointTypes: BreakpointType[] = response.breakpointTypes;
-        this.enabledBreakpointTypeIds = new Set(breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => breakpointType.id));
+        this._enabledBreakpointTypesIds = new Set(breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => breakpointType.id));
 
         return [
             new DomainSpecificBreakpointTypeFolderTreeItem('Enabled', breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
@@ -39,61 +40,36 @@ export class DomainSpecificBreakpointsProvider implements vscode.TreeDataProvide
         ]
     }
 
-    public getTreeItem(element: DomainSpecificBreakpointsTreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
-        return element;
-    }
-
-    public refresh(item: DomainSpecificBreakpointsTreeItem | undefined): void {
-        this._onDidChangeTreeData.fire(item);
+    public get enabledBreakpointTypesIds() : Set<string> {
+        return this._enabledBreakpointTypesIds;
     }
 }
 
-
-export abstract class DomainSpecificBreakpointsTreeItem extends vscode.TreeItem {
-    private provider: DomainSpecificBreakpointsProvider;
-
-    constructor(label: string | vscode.TreeItemLabel, provider: DomainSpecificBreakpointsProvider, collapsibleState?: vscode.TreeItemCollapsibleState) {
-        super(label, collapsibleState);
-        this.provider = provider;
-    }
-
-    abstract getChildren(): DomainSpecificBreakpointsTreeItemChildren;
-
-    public refresh(): void {
-        this.provider.refresh(undefined);
-    }
-}
-
-
-export class DomainSpecificBreakpointTypeFolderTreeItem extends DomainSpecificBreakpointsTreeItem {
-    private breakpointTypes: DomainSpecificBreakpointTypeTreeItem[];
-
+/**
+ * Folder for the domain-specific breakpoints view.
+ */
+export class DomainSpecificBreakpointTypeFolderTreeItem extends FolderTreeItem<DomainSpecificBreakpointTypeTreeItem> {
     constructor(name: string, breakpointTypes: DomainSpecificBreakpointTypeTreeItem[], provider: DomainSpecificBreakpointsProvider) {
-        super(name, provider, vscode.TreeItemCollapsibleState.Collapsed);
-        this.breakpointTypes = breakpointTypes;
-    }
-
-    public getChildren(): DomainSpecificBreakpointsTreeItemChildren {
-        return this.breakpointTypes;
+        super(name, breakpointTypes, provider);
     }
 }
 
-
-export class DomainSpecificBreakpointTypeTreeItem extends DomainSpecificBreakpointsTreeItem {
+/**
+ * Leaf item for the domain-specific breakpoints view.
+ */
+export class DomainSpecificBreakpointTypeTreeItem extends LeafTreeItem {
     readonly typeId: string;
     readonly targetElementTypeId: string;
 
     constructor(typeId: string, name: string, targetElementTypeId: string, description: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider) {
-        super(name, provider, vscode.TreeItemCollapsibleState.None);
+        super(name, provider);
         this.typeId = typeId;
         this.targetElementTypeId = targetElementTypeId;
         this.description = `Target type: ${targetElementTypeId}. ${description}`;
         this.contextValue = isEnabled ? 'enabledBreakpointType' : 'disabledBreakpointType';
     }
 
-    public getChildren(): DomainSpecificBreakpointsTreeItemChildren {
-        return undefined;
+    public get provider(): DomainSpecificBreakpointsProvider {
+        return this._provider as DomainSpecificBreakpointsProvider;
     }
-}
-
-type DomainSpecificBreakpointsTreeItemChildren = DomainSpecificBreakpointTypeTreeItem[] | null | undefined;
+} 
