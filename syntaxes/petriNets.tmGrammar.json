@@ -1,0 +1,12 @@
+{
+    "scopeName": "source.petriNets",
+    "fileTypes": [
+        "PetriNet"
+    ],
+    "patterns": [
+        {
+            "name": "keyword.control.petriNets",
+            "match": "\\b(PetriNet|Place|Capacity|Initial token number|Transition|From|weight|To)\\b"
+        }
+    ]
+}

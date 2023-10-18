@@ -1,0 +1,16 @@
+PetriNet test1 :
+
+    Place P1 :
+        Capacity : 8,
+        Initial token number : 4
+    end
+
+    Place P2 :
+        Capacity : 3,
+        Initial token number : 0
+    end
+
+    Transition T1 :
+        From P1, weight : 2
+        To P2, weight : 1
+    end 

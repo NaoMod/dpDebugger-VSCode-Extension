@@ -77,6 +77,28 @@
                     "terminate"
                 ]
             }
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Petri Net 1",
+            "sourceFile": "${workspaceFolder}/test1.PetriNet",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "enabledBreakpointTypeIds": [],
+            "additionalArgs": {}
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Petri Net 2",
+            "sourceFile": "${workspaceFolder}/test2.PetriNet",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "enabledBreakpointTypeIds": [],
+            "additionalArgs": {}
         }
     ]
 }
