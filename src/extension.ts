@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { ExtensionContext } from "vscode";
-import { activateDebug } from "./activateDebug";
+import { DebugSetup } from './activateDebug';
 
 /**
  * Override method to perform actions when activating the extension.
@@ -8,7 +8,8 @@ import { activateDebug } from "./activateDebug";
  * @param context Context of the extension.
  */
 export async function activate(context: ExtensionContext) {
-    activateDebug(context, new GenericDebugAdapterServerDescriptorFactory());
+    const debugSetup: DebugSetup = new DebugSetup();
+    debugSetup.activateDebug(context, new GenericDebugAdapterServerDescriptorFactory());
 }
 
 /**

@@ -15,18 +15,9 @@ export class SteppingModesProvider extends TreeDataProvider {
         const steppingModes: SteppingMode[] = response.steppingModes;
 
         return [
-            new SteppingModeFolderTreeItem('Enabled', steppingModes.filter(steppingMode => steppingMode.isEnabled).map(steppingMode => new SteppingModeTreeItem(steppingMode.id, steppingMode.name, steppingMode.description, true, this)), this),
-            new SteppingModeFolderTreeItem('Disabled', steppingModes.filter(steppingMode => !steppingMode.isEnabled).map(steppingMode => new SteppingModeTreeItem(steppingMode.id, steppingMode.name, steppingMode.description, false, this)), this)
+            new FolderTreeItem('Enabled', steppingModes.filter(steppingMode => steppingMode.isEnabled).map(steppingMode => new SteppingModeTreeItem(steppingMode.id, steppingMode.name, steppingMode.description, true, this)), this),
+            new FolderTreeItem('Disabled', steppingModes.filter(steppingMode => !steppingMode.isEnabled).map(steppingMode => new SteppingModeTreeItem(steppingMode.id, steppingMode.name, steppingMode.description, false, this)), this)
         ]
-    }
-}
-
-/**
- * Folder for the stepping mode tree view.
- */
-export class SteppingModeFolderTreeItem extends FolderTreeItem<SteppingModeTreeItem> {
-    constructor(name: string, steppingModes: SteppingModeTreeItem[], provider: SteppingModesProvider) {
-        super(name, steppingModes, provider);
     }
 }
 

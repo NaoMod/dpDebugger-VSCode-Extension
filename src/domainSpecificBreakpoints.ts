@@ -12,16 +12,14 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
         if (element) return element.getChildren();
 
-        while (!vscode.debug.activeDebugSession) await new Promise<void>(resolve => setTimeout(() => {
-            resolve()
-        }, 200));
+        await this.waitForDebugSession();
 
         const response: GetBreakpointTypesResponse = await vscode.debug.activeDebugSession?.customRequest('getBreakpointTypes');
         const breakpointTypes: BreakpointType[] = response.breakpointTypes;
         this._enabledBreakpointTypesIds = new Set(breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => breakpointType.id));
 
         return [
-            new DomainSpecificBreakpointTypeFolderTreeItem('Enabled', breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
+            new FolderTreeItem('Enabled', breakpointTypes.filter(breakpointType => breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
                 breakpointType.id,
                 breakpointType.name,
                 breakpointType.targetElementTypeId,
@@ -29,7 +27,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
                 true,
                 this
             )), this),
-            new DomainSpecificBreakpointTypeFolderTreeItem('Disabled', breakpointTypes.filter(breakpointType => !breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
+            new FolderTreeItem('Disabled', breakpointTypes.filter(breakpointType => !breakpointType.isEnabled).map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
                 breakpointType.id,
                 breakpointType.name,
                 breakpointType.targetElementTypeId,
@@ -42,15 +40,6 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
 
     public get enabledBreakpointTypesIds() : Set<string> {
         return this._enabledBreakpointTypesIds;
-    }
-}
-
-/**
- * Folder for the domain-specific breakpoints view.
- */
-export class DomainSpecificBreakpointTypeFolderTreeItem extends FolderTreeItem<DomainSpecificBreakpointTypeTreeItem> {
-    constructor(name: string, breakpointTypes: DomainSpecificBreakpointTypeTreeItem[], provider: DomainSpecificBreakpointsProvider) {
-        super(name, breakpointTypes, provider);
     }
 }
 
