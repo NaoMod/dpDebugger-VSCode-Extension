@@ -12,6 +12,7 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 
         return [
             new FolderTreeItem('Enabled', response.availableSteps.filter(step => step.isEnabled).map(step => new AvailableStepTreeItem(
+                step == response.availableSteps[0],
                 step.id,
                 step.name,
                 step.description,
@@ -19,6 +20,7 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
                 this
             )), this),
             new FolderTreeItem('Disabled', response.availableSteps.filter(step => !step.isEnabled).map(step => new AvailableStepTreeItem(
+                step == response.availableSteps[0],
                 step.id,
                 step.name,
                 step.description,
@@ -35,11 +37,16 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 export class AvailableStepTreeItem extends LeafTreeItem {
     readonly stepId: string;
 
-    constructor(stepId: string, name: string, description: string, isEnabled: boolean, provider: AvailableStepsDataProvider) {
+    constructor(isDefault: boolean, stepId: string, name: string, description: string, isEnabled: boolean, provider: AvailableStepsDataProvider) {
         super(name, provider);
         this.stepId = stepId;
-        this.description = description;
-        this.contextValue = isEnabled ? 'enabledStep' : 'disabledStep';
+        this.description = isDefault ? `(default) ${description}` : description;
+        if (isDefault) {
+            this.contextValue = isEnabled ? 'enabledDefaultStep' : 'disabledStep';
+        } else {
+            this.contextValue = isEnabled ? 'enabledStep' : 'disabledStep';
+        }
+        
     }
 
     public get provider(): AvailableStepsDataProvider {

@@ -99,6 +99,17 @@
             "pauseOnStart": true,
             "enabledBreakpointTypeIds": [],
             "additionalArgs": {}
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Petri Net 3",
+            "sourceFile": "${workspaceFolder}/test3.PetriNet",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "enabledBreakpointTypeIds": [],
+            "additionalArgs": {}
         }
     ]
 }
