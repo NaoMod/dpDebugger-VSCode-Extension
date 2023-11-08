@@ -4,9 +4,8 @@ import { FolderTreeItem, LeafTreeItem, TreeDataProvider, TreeItem } from "./tree
 
 export class AvailableStepsDataProvider extends TreeDataProvider {
     public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
+        if (!vscode.debug.activeDebugSession) return undefined;
         if (element) return element.getChildren();
-
-        await this.waitForDebugSession();
 
         const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession?.customRequest('getAvailableSteps');
 
@@ -46,7 +45,7 @@ export class AvailableStepTreeItem extends LeafTreeItem {
         } else {
             this.contextValue = isEnabled ? 'enabledStep' : 'disabledStep';
         }
-        
+
     }
 
     public get provider(): AvailableStepsDataProvider {

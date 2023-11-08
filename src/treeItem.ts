@@ -20,15 +20,6 @@ export abstract class TreeDataProvider implements vscode.TreeDataProvider<TreeIt
         this._onDidChangeTreeData.fire(item);
     }
 
-    /**
-     * Waits until the debug session is created.
-     */
-    protected async waitForDebugSession(): Promise<void> {
-        while (!vscode.debug.activeDebugSession) await new Promise<void>(resolve => setTimeout(() => {
-            resolve()
-        }, 200));
-    }
-
     public abstract getChildren(element?: TreeItem | undefined): vscode.ProviderResult<TreeItem[]>;
 }
 

@@ -108,7 +108,9 @@
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [],
+            "enabledBreakpointTypeIds": [
+                "TransitionTrigger"
+            ],
             "additionalArgs": {}
         }
     ]

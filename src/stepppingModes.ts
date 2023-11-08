@@ -7,11 +7,10 @@ import { FolderTreeItem, LeafTreeItem, TreeDataProvider, TreeItem } from './tree
  */
 export class SteppingModesProvider extends TreeDataProvider {
     public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
+        if (!vscode.debug.activeDebugSession) return undefined;
         if (element) return element.getChildren();
 
-        await this.waitForDebugSession();
-
-        const response: GetSteppingModesResponse = await vscode.debug.activeDebugSession?.customRequest('getSteppingModes');
+        const response: GetSteppingModesResponse = await vscode.debug.activeDebugSession.customRequest('getSteppingModes');
         const steppingModes: SteppingMode[] = response.steppingModes;
 
         return [
