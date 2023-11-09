@@ -19,6 +19,11 @@
   ],
   "contributes": {
     "menus": {
+      "debug/toolBar": [
+        {
+          "command": "extension.configurable-debug.continueUntilChoice"
+        }
+      ],
       "view/item/context": [
         {
           "command": "extension.configurable-debug.enableSteppingMode",
@@ -38,6 +43,15 @@
       ]
     },
     "commands": [
+      {
+        "command": "extension.configurable-debug.continueUntilChoice",
+        "title": "Continue Until Choice",
+        "category": "Configurable Debug",
+        "icon": {
+          "dark": "icons/debug-continue-dark.svg",
+          "light": "icons/debug-continue-light.svg"
+        }
+      },
       {
         "command": "extension.configurable-debug.enableSteppingMode",
         "title": "Enable Stepping Mode",

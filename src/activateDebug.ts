@@ -16,9 +16,10 @@ export class DebugSetup {
         this.createSteppingModesTreeView(context, availableStepsProvider);
         this.createDomainSpecificBreakpointsTreeView(context);
 
+        this.registerAdditionnalCommands(context);
+
         context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
     }
-
 
     private createDomainSpecificBreakpointsTreeView(context: vscode.ExtensionContext) {
         const provider: DomainSpecificBreakpointsProvider = new DomainSpecificBreakpointsProvider();
@@ -89,5 +90,14 @@ export class DebugSetup {
         );
 
         return provider;
+    }
+
+    private registerAdditionnalCommands(context: vscode.ExtensionContext) {
+        context.subscriptions.push(
+            vscode.commands.registerCommand('extension.configurable-debug.continueUntilChoice', () => {
+                vscode.debug.activeDebugSession?.customRequest('willContinueUntilChoice', {});
+                vscode.commands.executeCommand('workbench.action.debug.continue');
+            })
+        );
     }
 }
