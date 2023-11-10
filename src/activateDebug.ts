@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSteps';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
 import { SteppingModesProvider, SteppingModeTreeItem } from './stepppingModes';
-import { StoppedDebugAdapterTrackerFactory } from './trackers';
+import { InvalidatedStacksDebugAdapterTrackerFactory, StoppedDebugAdapterTrackerFactory } from './trackers';
 
 export class DebugSetup {
     /**
@@ -12,13 +12,25 @@ export class DebugSetup {
      * @param factory Factory of the debug adapter descriptor.
      */
     public activateDebug(context: vscode.ExtensionContext, factory: vscode.DebugAdapterDescriptorFactory) {
+        const stoppedTrackerFactory: StoppedDebugAdapterTrackerFactory = new StoppedDebugAdapterTrackerFactory();
+        const invalidatedStacksTrackerFactory: InvalidatedStacksDebugAdapterTrackerFactory = new InvalidatedStacksDebugAdapterTrackerFactory();
+
         const availableStepsProvider: AvailableStepsDataProvider = this.createAvailableStepsTreeView(context);
+        stoppedTrackerFactory.providers.push(availableStepsProvider);
+
         this.createSteppingModesTreeView(context, availableStepsProvider);
         this.createDomainSpecificBreakpointsTreeView(context);
 
+        this.registerTrackers(context, stoppedTrackerFactory, invalidatedStacksTrackerFactory);
         this.registerAdditionnalCommands(context);
 
         context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
+    }
+
+    private registerTrackers(context: vscode.ExtensionContext, ...trackers: vscode.DebugAdapterTrackerFactory[]) {
+        for (const tracker of trackers) {
+            context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('configurable', tracker));
+        }
     }
 
     private createDomainSpecificBreakpointsTreeView(context: vscode.ExtensionContext) {
@@ -67,12 +79,9 @@ export class DebugSetup {
 
     private createAvailableStepsTreeView(context: vscode.ExtensionContext): AvailableStepsDataProvider {
         const provider: AvailableStepsDataProvider = new AvailableStepsDataProvider();
-        const stoppedTrackerFactory: StoppedDebugAdapterTrackerFactory = new StoppedDebugAdapterTrackerFactory();
-        stoppedTrackerFactory.providers.push(provider);
 
         context.subscriptions.push(
             vscode.window.registerTreeDataProvider('availableSteps', provider),
-            vscode.debug.registerDebugAdapterTrackerFactory('configurable', stoppedTrackerFactory),
 
             // Command to enable a step in the Available Steps tab
             vscode.commands.registerCommand('extension.configurable-debug.enableStep', async (step: AvailableStepTreeItem) => {

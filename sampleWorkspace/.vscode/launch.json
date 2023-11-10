@@ -109,7 +109,7 @@
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "enabledBreakpointTypeIds": [
-                "TransitionTrigger"
+                "Transition.trigger"
             ],
             "additionalArgs": {}
         }
