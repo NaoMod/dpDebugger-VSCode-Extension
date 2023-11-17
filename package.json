@@ -23,23 +23,6 @@
         {
           "command": "extension.configurable-debug.continueUntilChoice"
         }
-      ],
-      "view/item/context": [
-        {
-          "command": "extension.configurable-debug.enableSteppingMode",
-          "when": "view == steppingModes && viewItem == disabledSteppingMode",
-          "group": "inline"
-        },
-        {
-          "command": "extension.configurable-debug.enableStep",
-          "when": "view == availableSteps && viewItem == disabledStep",
-          "group": "inline"
-        },
-        {
-          "command": "extension.configurable-debug.disableStep",
-          "when": "view == availableSteps && viewItem == enabledStep",
-          "group": "inline"
-        }
       ]
     },
     "commands": [
@@ -50,33 +33,6 @@
         "icon": {
           "dark": "icons/debug-continue-dark.svg",
           "light": "icons/debug-continue-light.svg"
-        }
-      },
-      {
-        "command": "extension.configurable-debug.enableSteppingMode",
-        "title": "Enable Stepping Mode",
-        "category": "Configurable Debug",
-        "icon": {
-          "dark": "icons/add-dark.svg",
-          "light": "icons/add-light.svg"
-        }
-      },
-      {
-        "command": "extension.configurable-debug.enableStep",
-        "title": "Enable Step",
-        "category": "Configurable Debug",
-        "icon": {
-          "dark": "icons/add-dark.svg",
-          "light": "icons/add-light.svg"
-        }
-      },
-      {
-        "command": "extension.configurable-debug.disableStep",
-        "title": "Disable Step",
-        "category": "Configurable Debug",
-        "icon": {
-          "dark": "icons/remove-dark.svg",
-          "light": "icons/remove-light.svg"
         }
       }
     ],

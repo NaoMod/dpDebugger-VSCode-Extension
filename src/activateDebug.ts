@@ -63,40 +63,48 @@ export class DebugSetup {
 
     private createSteppingModesTreeView(context: vscode.ExtensionContext, availableStepsProvider: AvailableStepsDataProvider) {
         const provider: SteppingModesProvider = new SteppingModesProvider();
+        const treeView: vscode.TreeView<vscode.TreeItem> = vscode.window.createTreeView('steppingModes', {
+            treeDataProvider: provider
+        });
+
+        treeView.onDidChangeCheckboxState(async event => {
+            for (const item of event.items) {
+                const steppingMode: SteppingModeTreeItem = item[0] as SteppingModeTreeItem;
+                if (item[1] === vscode.TreeItemCheckboxState.Checked) {
+                    await vscode.debug.activeDebugSession?.customRequest('enableSteppingMode', { steppingModeId: steppingMode.modeId });
+                }
+            }
+
+            provider.refresh(undefined);
+            availableStepsProvider.refresh(undefined);
+        });
+
         context.subscriptions.push(
-            vscode.window.registerTreeDataProvider('steppingModes', provider),
-            vscode.debug.onDidStartDebugSession(() => provider.refresh(undefined)),
-
-            // Command to enable a stepping mode in the associated tab
-            vscode.commands.registerCommand('extension.configurable-debug.enableSteppingMode', async (steppingMode: SteppingModeTreeItem) => {
-                await vscode.debug.activeDebugSession?.customRequest('enableSteppingMode', { steppingModeId: steppingMode.modeId });
-
-                steppingMode.refresh();
-                availableStepsProvider.refresh(undefined);
-            }),
+            treeView,
+            vscode.debug.onDidStartDebugSession(() => provider.refresh(undefined))
         );
     }
 
     private createAvailableStepsTreeView(context: vscode.ExtensionContext): AvailableStepsDataProvider {
         const provider: AvailableStepsDataProvider = new AvailableStepsDataProvider();
+        const treeView: vscode.TreeView<vscode.TreeItem> = vscode.window.createTreeView('availableSteps', {
+            treeDataProvider: provider
+        });
 
-        context.subscriptions.push(
-            vscode.window.registerTreeDataProvider('availableSteps', provider),
+        treeView.onDidChangeCheckboxState(async event => {
+            for (const item of event.items) {
+                const step: AvailableStepTreeItem = item[0] as AvailableStepTreeItem;
+                if (item[1] === vscode.TreeItemCheckboxState.Checked) {
+                    await vscode.debug.activeDebugSession?.customRequest('enableStep', { stepId: step.stepId });
+                } else {
+                    await vscode.debug.activeDebugSession?.customRequest('enableStep', {});
+                }
+            }
 
-            // Command to enable a step in the Available Steps tab
-            vscode.commands.registerCommand('extension.configurable-debug.enableStep', async (step: AvailableStepTreeItem) => {
-                await vscode.debug.activeDebugSession?.customRequest('enableStep', { stepId: step.stepId });
+            provider.refresh(undefined);
+        });
 
-                step.refresh();
-            }),
-
-            // Command to disable a step in the Available Steps tab
-            vscode.commands.registerCommand('extension.configurable-debug.disableStep', async (step: AvailableStepTreeItem) => {
-                await vscode.debug.activeDebugSession?.customRequest('enableStep', {});
-
-                step.refresh();
-            })
-        );
+        context.subscriptions.push(treeView);
 
         return provider;
     }

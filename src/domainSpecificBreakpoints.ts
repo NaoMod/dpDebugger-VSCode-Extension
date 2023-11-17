@@ -40,11 +40,10 @@ export class DomainSpecificBreakpointTypeTreeItem extends LeafTreeItem {
     readonly targetElementTypeId: string;
 
     constructor(typeId: string, name: string, targetElementTypeId: string, description: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider) {
-        super(name, provider);
+        const formattedDescription: string = `Target type: ${targetElementTypeId}. ${description}`;
+        super(name, formattedDescription, isEnabled, provider);
         this.typeId = typeId;
         this.targetElementTypeId = targetElementTypeId;
-        this.description = `Target type: ${targetElementTypeId}. ${description}`;
-        this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;
     }
 
     public get provider(): DomainSpecificBreakpointsProvider {

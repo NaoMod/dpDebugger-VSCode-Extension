@@ -48,27 +48,13 @@ export abstract class TreeItem extends vscode.TreeItem {
 }
 
 /**
- * Folder of a tree view, which can contain other items.
- */
-export class FolderTreeItem<T extends TreeItem> extends TreeItem {
-    private children: T[];
-
-    constructor(name: string, children: T[], provider: TreeDataProvider) {
-        super(name, provider, vscode.TreeItemCollapsibleState.Collapsed);
-        this.children = children;
-    }
-
-    public getChildren(): TreeItemChildren {
-        return this.children;
-    }
-}
-
-/**
  * Leaf item of a tree view, which has no children.
  */
 export abstract class LeafTreeItem extends TreeItem {
-    constructor(name: string, provider: TreeDataProvider) {
+    constructor(name: string, description: string, isEnabled: boolean, provider: TreeDataProvider) {
         super(name, provider, vscode.TreeItemCollapsibleState.None);
+        this.description = description;
+        this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;
     }
 
     public getChildren(): TreeItemChildren {

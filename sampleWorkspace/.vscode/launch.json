@@ -56,6 +56,26 @@
         {
             "type": "configurable",
             "request": "launch",
+            "name": "Launch Non-Deterministic State Machine",
+            "sourceFile": "${workspaceFolder}/non-deterministic.stmch",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "enabledBreakpointTypeIds": [
+                "stateMachine.stateReached"
+            ],
+            "additionalArgs": {
+                "inputs": [
+                    "a",
+                    "b",
+                    "c",
+                    "final"
+                ]
+            }
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
             "name": "Launch Telephone State Machine",
             "sourceFile": "${workspaceFolder}/telephone.stmch",
             "configurableDebuggerPort": 49153,
