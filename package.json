@@ -95,8 +95,13 @@
               },
               "pauseOnStart": {
                 "type": "boolean",
-                "description": "True if the program should stop before executing the first step.",
+                "description": "True if the program should pause before executing the first step.",
                 "default": true
+              },
+              "pauseOnEnd": {
+                "type": "boolean",
+                "description": "True if the program should pause after executing the last step, instead of terminating the debug session.",
+                "default": false
               },
               "enabledBreakpointTypeIds": {
                 "type": "array",

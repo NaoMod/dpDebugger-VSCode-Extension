@@ -56,6 +56,28 @@
         {
             "type": "configurable",
             "request": "launch",
+            "name": "Launch Sample Arithmetic State Machine",
+            "sourceFile": "${workspaceFolder}/sample_arithmetic.stmch",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "pauseOnEnd": true,
+            "enabledBreakpointTypeIds": [
+                "stateMachine.stateReached"
+            ],
+            "additionalArgs": {
+                "inputs": [
+                    "b",
+                    "d",
+                    "a",
+                    "b",
+                    "final"
+                ]
+            }
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
             "name": "Launch Non-Deterministic State Machine",
             "sourceFile": "${workspaceFolder}/non-deterministic.stmch",
             "configurableDebuggerPort": 49153,
