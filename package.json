@@ -48,14 +48,6 @@
           "when": "inDebugMode"
         },
         {
-          "id": "steppingModes",
-          "name": "Stepping Modes",
-          "contextualTitle": "Debug",
-          "type": "tree",
-          "visibility": "collapsed",
-          "when": "inDebugMode"
-        },
-        {
           "id": "availableSteps",
           "name": "Available Steps",
           "contextualTitle": "Debug",

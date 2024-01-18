@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSteps';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
-import { SteppingModesProvider, SteppingModeTreeItem } from './stepppingModes';
 import { InvalidatedStacksDebugAdapterTrackerFactory, StoppedDebugAdapterTrackerFactory } from './trackers';
 
 export class DebugSetup {
@@ -18,7 +17,6 @@ export class DebugSetup {
         const availableStepsProvider: AvailableStepsDataProvider = this.createAvailableStepsTreeView(context);
         stoppedTrackerFactory.providers.push(availableStepsProvider);
 
-        this.createSteppingModesTreeView(context, availableStepsProvider);
         this.createDomainSpecificBreakpointsTreeView(context);
 
         this.registerTrackers(context, stoppedTrackerFactory, invalidatedStacksTrackerFactory);
@@ -58,30 +56,6 @@ export class DebugSetup {
         context.subscriptions.push(
             vscode.debug.onDidStartDebugSession(() => provider.refresh(undefined)),
             treeView
-        );
-    }
-
-    private createSteppingModesTreeView(context: vscode.ExtensionContext, availableStepsProvider: AvailableStepsDataProvider) {
-        const provider: SteppingModesProvider = new SteppingModesProvider();
-        const treeView: vscode.TreeView<vscode.TreeItem> = vscode.window.createTreeView('steppingModes', {
-            treeDataProvider: provider
-        });
-
-        treeView.onDidChangeCheckboxState(async event => {
-            for (const item of event.items) {
-                const steppingMode: SteppingModeTreeItem = item[0] as SteppingModeTreeItem;
-                if (item[1] === vscode.TreeItemCheckboxState.Checked) {
-                    await vscode.debug.activeDebugSession?.customRequest('enableSteppingMode', { steppingModeId: steppingMode.modeId });
-                }
-            }
-
-            provider.refresh(undefined);
-            availableStepsProvider.refresh(undefined);
-        });
-
-        context.subscriptions.push(
-            treeView,
-            vscode.debug.onDidStartDebugSession(() => provider.refresh(undefined))
         );
     }
 
