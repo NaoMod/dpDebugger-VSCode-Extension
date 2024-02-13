@@ -20,10 +20,10 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
         return breakpointTypes.map(breakpointType => new DomainSpecificBreakpointTypeTreeItem(
             breakpointType.id,
             breakpointType.name,
-            breakpointType.targetElementTypeId,
             breakpointType.description,
             breakpointType.isEnabled,
-            this
+            this,
+            breakpointType.targetElementTypeId
         ));
     }
 
@@ -37,10 +37,10 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
  */
 export class DomainSpecificBreakpointTypeTreeItem extends LeafTreeItem {
     readonly typeId: string;
-    readonly targetElementTypeId: string;
+    readonly targetElementTypeId: string | undefined;
 
-    constructor(typeId: string, name: string, targetElementTypeId: string, description: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider) {
-        const formattedDescription: string = `Target type: ${targetElementTypeId}. ${description}`;
+    constructor(typeId: string, name: string, description: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider, targetElementTypeId?: string) {
+        const formattedDescription: string = targetElementTypeId == undefined ? `No target type. ${description}` : `Target type: ${targetElementTypeId}. ${description}`;
         super(name, formattedDescription, isEnabled, provider);
         this.typeId = typeId;
         this.targetElementTypeId = targetElementTypeId;
