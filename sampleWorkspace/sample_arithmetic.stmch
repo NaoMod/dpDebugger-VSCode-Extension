@@ -2,30 +2,32 @@ StateMachine SampleMachine {
     INITIAL -> A;
 
     state A {
-        -> B ['b' / 'aTOb' / y=1;];
-        -> B ['b' / 'aTOb' / 
+        -> B ['b' /
+            y=1;
+        ];
+        -> B ['b' / 
             y=12;
             a=0;
         ];
     }
 
     composite state B {
-        -> A ['a' / 'bTOa'/
+        -> A ['a' /
             a=y+5;
             b=2;
             b=3;
             b=2;
         ];
-        -> FINAL ['final' / 'bTOfinal'];
+        -> FINAL ['final'];
 
         INITIAL -> C;
 
         state C {
-            -> D ['d' / 'cTOd'];
+            -> D ['d'];
         }
 
         state D {
-            -> C ['c' / 'dTOc'];
+            -> C ['c'];
         }
     }
 }

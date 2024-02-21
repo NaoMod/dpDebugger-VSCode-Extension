@@ -1,0 +1,11 @@
+StateMachine LoopMachine {
+    INITIAL -> A;
+
+    state A {
+        -> B ['b'];
+    }
+
+    state B {
+        -> A ['a'];
+    }
+}

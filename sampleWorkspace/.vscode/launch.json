@@ -7,51 +7,14 @@
         {
             "type": "configurable",
             "request": "launch",
-            "name": "Launch AtoB MiniTL",
-            "sourceFile": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/simpleAtoB.minitl",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [],
-            "additionalArgs": {
-                "inputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/input/modelA.xmi",
-                "outputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/simpleAtoB/output/modelB.xmi"
-            }
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch BookToPublication MiniTL",
-            "sourceFile": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/bookToPublication/bookToPublication.minitl",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [],
-            "additionalArgs": {
-                "inputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/bookToPublication/input/Book.xmi",
-                "outputModel": "${workspaceFolder}/../../runtimes/MiniTL/plugins/org.tetrabox.example.minitl.examples/transfos/bookToPublication/output/Publication.xmi"
-            }
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
             "name": "Launch Sample State Machine",
             "sourceFile": "${workspaceFolder}/sample.stmch",
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "enabledBreakpointTypeIds": [
-                "stateMachine.stateReached"
-            ],
-            "additionalArgs": {
-                "inputs": [
-                    "b",
-                    "d",
-                    "a",
-                    "b",
-                    "final"
-                ]
-            }
+                "stateReached"
+            ]
         },
         {
             "type": "configurable",
@@ -63,17 +26,8 @@
             "pauseOnStart": true,
             "pauseOnEnd": true,
             "enabledBreakpointTypeIds": [
-                "stateMachine.stateReached"
-            ],
-            "additionalArgs": {
-                "inputs": [
-                    "b",
-                    "d",
-                    "a",
-                    "b",
-                    "final"
-                ]
-            }
+                "stateReached"
+            ]
         },
         {
             "type": "configurable",
@@ -84,16 +38,30 @@
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "enabledBreakpointTypeIds": [
-                "stateMachine.stateReached"
-            ],
-            "additionalArgs": {
-                "inputs": [
-                    "a",
-                    "b",
-                    "c",
-                    "final"
-                ]
-            }
+                "stateReached"
+            ]
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Slot State Machine",
+            "sourceFile": "${workspaceFolder}/slot.stmch",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "pauseOnEnd": true,
+            "enabledBreakpointTypeIds": [
+                "stateReached"
+            ]
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Loop State Machine",
+            "sourceFile": "${workspaceFolder}/loop.stmch",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true
         },
         {
             "type": "configurable",
@@ -102,23 +70,7 @@
             "sourceFile": "${workspaceFolder}/telephone.stmch",
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "additionalArgs": {
-                "inputs": [
-                    "liftReceiver",
-                    "after",
-                    "callerHangsUp",
-                    "liftReceiver",
-                    "dialDigit",
-                    "dialDigitIncomplete",
-                    "dialDigitValid",
-                    "connected",
-                    "calleeAnswers",
-                    "calleeHangsUp",
-                    "calleeAnswers",
-                    "terminate"
-                ]
-            }
+            "pauseOnStart": true
         },
         {
             "type": "configurable",
@@ -128,8 +80,6 @@
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [],
-            "additionalArgs": {}
         },
         {
             "type": "configurable",
@@ -139,8 +89,6 @@
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [],
-            "additionalArgs": {}
         },
         {
             "type": "configurable",
@@ -150,10 +98,10 @@
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
+            "pauseOnEnd": true,
             "enabledBreakpointTypeIds": [
                 "Transition.trigger"
-            ],
-            "additionalArgs": {}
+            ]
         }
     ]
 }

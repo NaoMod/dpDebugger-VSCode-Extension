@@ -1,0 +1,45 @@
+StateMachine SlotMachine {
+    INITIAL -> Idle;
+
+    state Idle {
+        -> Playing ['insert' /
+            i = 1;
+            g = 0;
+        ];
+        -> FINAL ['turnOff'];
+    }
+
+    composite state Playing {
+        -> Idle ['exit' /
+            i = 0;
+            g = 0;    
+        ];
+
+        INITIAL -> Ready;
+
+        state Ready {
+            -> Ready ['insert' /
+                i = i+1;
+            ];
+            -> Won ['win' /
+                g = g + (i*5);
+                i = 0;
+            ];
+            -> Lost ['win' / 
+                i = 0;
+            ];
+        }
+
+        state Won {
+            -> Ready ['insert' /
+                i = 1;
+            ];
+        }
+
+        state Lost {
+            -> Ready ['insert' /
+                i = 1;
+            ];
+        }
+    }
+}
