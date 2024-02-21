@@ -20,7 +20,6 @@ export class DebugSetup {
         this.createDomainSpecificBreakpointsTreeView(context);
 
         this.registerTrackers(context, stoppedTrackerFactory, invalidatedStacksTrackerFactory);
-        this.registerAdditionnalCommands(context);
 
         context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
     }
@@ -81,14 +80,5 @@ export class DebugSetup {
         context.subscriptions.push(treeView);
 
         return provider;
-    }
-
-    private registerAdditionnalCommands(context: vscode.ExtensionContext) {
-        context.subscriptions.push(
-            vscode.commands.registerCommand('extension.configurable-debug.continueUntilChoice', () => {
-                vscode.debug.activeDebugSession?.customRequest('willContinueUntilChoice', {});
-                vscode.commands.executeCommand('workbench.action.debug.continue');
-            })
-        );
     }
 }

@@ -18,24 +18,6 @@
     "onDebugDynamicConfigurations:configurable"
   ],
   "contributes": {
-    "menus": {
-      "debug/toolBar": [
-        {
-          "command": "extension.configurable-debug.continueUntilChoice"
-        }
-      ]
-    },
-    "commands": [
-      {
-        "command": "extension.configurable-debug.continueUntilChoice",
-        "title": "Continue Until Choice",
-        "category": "Configurable Debug",
-        "icon": {
-          "dark": "icons/debug-continue-dark.svg",
-          "light": "icons/debug-continue-light.svg"
-        }
-      }
-    ],
     "views": {
       "debug": [
         {
