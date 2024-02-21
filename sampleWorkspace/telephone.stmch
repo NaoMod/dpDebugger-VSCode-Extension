@@ -6,14 +6,14 @@ StateMachine Telephone {
     }
 
     composite state Active {
-        -> Idle ['callerHangsUp' / 'disconnect'];
-        -> FINAL ['terminate' / 'terminated'];
+        -> Idle ['callerHangsUp'];
+        -> FINAL ['terminate'];
 
         INITIAL -> DialTone;
 
         state DialTone {
-            -> TimeOut ['after' / 'timedOut'];
-            -> Dialing ['dialDigit' / 'dialing'];
+            -> TimeOut ['after'];
+            -> Dialing ['dialDigit'];
         }
 
         state TimeOut {
@@ -21,10 +21,10 @@ StateMachine Telephone {
         }
 
         state Dialing {
-            -> TimeOut ['after' / 'timedOut'];
-            -> Invalid ['dialDigitInvalid' / 'invalid'];
-            -> Dialing ['dialDigitIncomplete' / 'incomplete'];
-            -> Connecting ['dialDigitValid' / 'valid'];
+            -> TimeOut ['after'];
+            -> Invalid ['dialDigitInvalid'];
+            -> Dialing ['dialDigitIncomplete'];
+            -> Connecting ['dialDigitValid'];
         }
 
         state Invalid {
@@ -32,8 +32,8 @@ StateMachine Telephone {
         }
 
         state Connecting {
-            -> Busy ['busy' / 'busy'];
-            -> Ringing ['connected' / 'connected'];
+            -> Busy ['busy'];
+            -> Ringing ['connected'];
         }
 
         state Busy {
@@ -41,15 +41,15 @@ StateMachine Telephone {
         }
 
         state Ringing {
-            -> Talking ['calleeAnswers' / 'enableSpeech'];
+            -> Talking ['calleeAnswers'];
         }
 
         state Talking {
-            -> Pinned ['calleeHangsUp' / 'pinned'];
+            -> Pinned ['calleeHangsUp'];
         }
 
         state Pinned {
-            -> Talking ['calleeAnswers' / 'talking'];
+            -> Talking ['calleeAnswers'];
         }
     }
 }
