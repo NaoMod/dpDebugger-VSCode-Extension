@@ -10,7 +10,6 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
         const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession?.customRequest('getAvailableSteps');
 
         return response.availableSteps.map((step, i) => new AvailableStepTreeItem(
-            i == 0,
             step.id,
             step.name,
             step.description,
@@ -26,9 +25,8 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 export class AvailableStepTreeItem extends LeafTreeItem {
     readonly stepId: string;
 
-    constructor(isDefault: boolean, stepId: string, name: string, description: string, isEnabled: boolean, provider: AvailableStepsDataProvider) {
-        const formattedDescription: string = isDefault ? `(default) ${description}` : description;
-        super(name, formattedDescription, isEnabled, provider);
+    constructor(stepId: string, name: string, description: string, isEnabled: boolean, provider: AvailableStepsDataProvider) {
+        super(name, description, isEnabled, provider);
         this.stepId = stepId;
     }
 
