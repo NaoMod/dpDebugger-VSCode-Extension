@@ -69,8 +69,6 @@ export class DebugSetup {
                 const step: AvailableStepTreeItem = item[0] as AvailableStepTreeItem;
                 if (item[1] === vscode.TreeItemCheckboxState.Checked) {
                     await vscode.debug.activeDebugSession?.customRequest('enableStep', { stepId: step.stepId });
-                } else {
-                    await vscode.debug.activeDebugSession?.customRequest('enableStep', {});
                 }
             }
 
