@@ -81,6 +81,11 @@
                 "type": "array",
                 "description": "Enabled breakpoint types at the start of execution."
               },
+              "skipRedundantPauses": {
+                "type": "boolean",
+                "description": "True if the program should pause multiple times on the same runtime state for different reasons (e.g. multiple breakpoints, choice...).",
+                "default": false
+              },
               "additionalArgs": {
                 "type": "object",
                 "description": "Additional arguments that may be required for specific languages."
