@@ -43,6 +43,7 @@ export class InvalidatedStacksDebugAdapterTracker implements vscode.DebugAdapter
     private mustFocusOnNextRefresh: boolean = false;
 
     public onDidSendMessage(message: any): void {
+        // Refresh focus on stack trace to highlight correct step position on the editor
         if (message.command === 'variables' && this.mustFocusOnNextRefresh) {
             this.refreshFocus();
             return;
@@ -64,7 +65,7 @@ export class InvalidatedStacksDebugAdapterTracker implements vscode.DebugAdapter
     }
 
     private async refreshFocus() {
-        // pretty bad but hey, it works
+        // Pretty bad but hey, it works
         vscode.commands.executeCommand('workbench.debug.action.focusCallStackView');
         await new Promise<void>(resolve => setTimeout(() => {
             resolve()

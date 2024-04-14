@@ -2,6 +2,9 @@ import * as vscode from 'vscode';
 import { GetAvailableStepsResponse } from './DAPExtension';
 import { LeafTreeItem, TreeDataProvider, TreeItem } from "./treeItem";
 
+/**
+ * Data provider for the 'Available Steps' view.
+ */
 export class AvailableStepsDataProvider extends TreeDataProvider {
     public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
         if (!vscode.debug.activeDebugSession) return undefined;
@@ -20,7 +23,7 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 }
 
 /**
- * Leaf item for the available steps view.
+ * Leaf item for the 'Available Steps' view.
  */
 export class AvailableStepTreeItem extends LeafTreeItem {
     readonly stepId: string;

@@ -3,7 +3,7 @@ import { BreakpointType, GetBreakpointTypesResponse } from './DAPExtension';
 import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
 
 /**
- * Data provider for the domain-specific breakpoints view.
+ * Data provider for the 'Domain-Specific Breakpoints' view.
  */
 export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     // Stores the ids of the currently enabled breakpoint types
@@ -33,7 +33,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
 }
 
 /**
- * Leaf item for the domain-specific breakpoints view.
+ * Leaf item for the 'Domain-Specific Breakpoints' view.
  */
 export class DomainSpecificBreakpointTypeTreeItem extends LeafTreeItem {
     readonly typeId: string;
