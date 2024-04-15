@@ -51,7 +51,7 @@ export abstract class TreeItem extends vscode.TreeItem {
  * Leaf item of a tree view, which has no children.
  */
 export abstract class LeafTreeItem extends TreeItem {
-    constructor(name: string, description: string, isEnabled: boolean, provider: TreeDataProvider) {
+    constructor(name: string, isEnabled: boolean, provider: TreeDataProvider, description?: string) {
         super(name, provider, vscode.TreeItemCollapsibleState.None);
         this.description = description;
         this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;

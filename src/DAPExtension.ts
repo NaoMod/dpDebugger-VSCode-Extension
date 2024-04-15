@@ -14,7 +14,7 @@ type Leaf = {
     name: string;
 
     /** Human-readable description of the item. */
-    description: string;
+    description?: string;
 
     /** True if this item is currently enabled, false otherwise. */
     isEnabled: boolean;

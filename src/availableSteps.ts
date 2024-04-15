@@ -15,9 +15,9 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
         return response.availableSteps.map((step, i) => new AvailableStepTreeItem(
             step.id,
             step.name,
-            step.description,
             step.isEnabled,
-            this
+            this,
+            step.description
         ));
     }
 }
@@ -28,8 +28,8 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 export class AvailableStepTreeItem extends LeafTreeItem {
     readonly stepId: string;
 
-    constructor(stepId: string, name: string, description: string, isEnabled: boolean, provider: AvailableStepsDataProvider) {
-        super(name, description, isEnabled, provider);
+    constructor(stepId: string, name: string, isEnabled: boolean, provider: AvailableStepsDataProvider, description?: string,) {
+        super(name, isEnabled, provider, description);
         this.stepId = stepId;
     }
 
