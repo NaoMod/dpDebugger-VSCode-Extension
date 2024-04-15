@@ -12,7 +12,7 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
 
         const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession?.customRequest('getAvailableSteps');
 
-        return response.availableSteps.map((step, i) => new AvailableStepTreeItem(
+        return response.availableSteps.map(step => new AvailableStepTreeItem(
             step.id,
             step.name,
             step.isEnabled,
