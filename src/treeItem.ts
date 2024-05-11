@@ -3,11 +3,11 @@ import * as vscode from 'vscode';
 /**
  * Data provider for a tree view.
  */
-export abstract class TreeDataProvider implements vscode.TreeDataProvider<TreeItem> {
+export abstract class TreeDataProvider implements vscode.TreeDataProvider<TreeItem<TreeDataProvider>> {
     private _onDidChangeTreeData: vscode.EventEmitter<any> = new vscode.EventEmitter<any>();
-    readonly onDidChangeTreeData?: vscode.Event<void | TreeItem | TreeItem[] | null | undefined> = this._onDidChangeTreeData.event;
+    readonly onDidChangeTreeData?: vscode.Event<void | TreeItem<TreeDataProvider> | TreeItem<TreeDataProvider>[] | null | undefined> = this._onDidChangeTreeData.event;
 
-    public getTreeItem(element: TreeItem): vscode.TreeItem | Thenable<vscode.TreeItem> {
+    public getTreeItem(element: TreeItem<TreeDataProvider>): vscode.TreeItem | Thenable<vscode.TreeItem> {
         return element;
     }
 
@@ -16,20 +16,20 @@ export abstract class TreeDataProvider implements vscode.TreeDataProvider<TreeIt
      * 
      * @param item Tree item from which to start the refresh, undefined to refresh the entire tree. 
      */
-    public refresh(item: TreeItem | undefined): void {
+    public refresh(item: TreeItem<TreeDataProvider> | undefined): void {
         this._onDidChangeTreeData.fire(item);
     }
 
-    public abstract getChildren(element?: TreeItem | undefined): vscode.ProviderResult<TreeItem[]>;
+    public abstract getChildren(element?: TreeItem<TreeDataProvider> | undefined): vscode.ProviderResult<TreeItem<TreeDataProvider>[]>;
 }
 
 /**
  * Item of a tree view.
  */
-export abstract class TreeItem extends vscode.TreeItem {
-    protected _provider: TreeDataProvider;
+export abstract class TreeItem<T extends TreeDataProvider> extends vscode.TreeItem {
+    protected _provider: T;
 
-    constructor(label: string | vscode.TreeItemLabel, provider: TreeDataProvider, collapsibleState?: vscode.TreeItemCollapsibleState) {
+    constructor(label: string | vscode.TreeItemLabel, provider: T, collapsibleState?: vscode.TreeItemCollapsibleState) {
         super(label, collapsibleState);
         this._provider = provider;
     }
@@ -37,7 +37,7 @@ export abstract class TreeItem extends vscode.TreeItem {
     /**
      * Returns the children of this item.
      */
-    abstract getChildren(): TreeItemChildren;
+    abstract getChildren(): vscode.ProviderResult<TreeItemChildren>;
 
     /**
      * Refreshes the content of this tree item.
@@ -50,16 +50,16 @@ export abstract class TreeItem extends vscode.TreeItem {
 /**
  * Leaf item of a tree view, which has no children.
  */
-export abstract class LeafTreeItem extends TreeItem {
+export abstract class LeafTreeItem extends TreeItem<TreeDataProvider> {
     constructor(name: string, isEnabled: boolean, provider: TreeDataProvider, description?: string) {
         super(name, provider, vscode.TreeItemCollapsibleState.None);
         this.description = description;
         this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;
     }
 
-    public getChildren(): TreeItemChildren {
+    public getChildren(): vscode.ProviderResult<TreeItemChildren> {
         return undefined;
     }
 }
 
-type TreeItemChildren = TreeItem[] | null | undefined;
+type TreeItemChildren = TreeItem<TreeDataProvider>[] | null | undefined;

@@ -190,6 +190,7 @@
     "typescript": "^4.5.4"
   },
   "dependencies": {
+    "@vscode/debugprotocol": "^1.65.0",
     "jayson": "^4.0.0"
   }
 }

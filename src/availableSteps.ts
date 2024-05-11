@@ -6,11 +6,11 @@ import { LeafTreeItem, TreeDataProvider, TreeItem } from "./treeItem";
  * Data provider for the 'Available Steps' view.
  */
 export class AvailableStepsDataProvider extends TreeDataProvider {
-    public async getChildren(element?: TreeItem | undefined): Promise<TreeItem[] | null | undefined> {
+    public async getChildren(element?: TreeItem<TreeDataProvider> | undefined): Promise<TreeItem<TreeDataProvider>[] | null | undefined> {
         if (!vscode.debug.activeDebugSession) return undefined;
         if (element) return element.getChildren();
 
-        const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession?.customRequest('getAvailableSteps');
+        const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession.customRequest('getAvailableSteps', { sourceFile: vscode.debug.activeDebugSession.configuration.sourceFile });
 
         return response.availableSteps.map(step => new AvailableStepTreeItem(
             step.id,
