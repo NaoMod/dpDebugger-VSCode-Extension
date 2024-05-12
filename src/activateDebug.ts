@@ -85,7 +85,7 @@ export class DebugSetup {
             // Retrieval of breakpoint types
             vscode.debug.onDidStartDebugSession(async () => {
                 if (vscode.debug.activeDebugSession === undefined) throw new Error('Undefined debug session.');
-                provider.sourceFile = vscode.debug.activeDebugSession.configuration.sourceFile;
+                provider.initialize(vscode.debug.activeDebugSession.configuration.sourceFile);
 
                 const getBreakpointTypesResponse: GetBreakpointTypesResponse = await vscode.debug.activeDebugSession.customRequest('getBreakpointTypes', { sourceFile: provider.sourceFile });
                 provider.breakpointTypes = new Map();

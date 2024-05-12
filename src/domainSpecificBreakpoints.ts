@@ -7,16 +7,35 @@ import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
  * Data provider for the 'Domain-Specific Breakpoints' view.
  */
 export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
-    public sourceFile: string = '';
+    private _sourceFile: string = '';
     public enabledStandaloneBreakpointTypes: Set<string> = new Set();
     public domainSpecificBreakpoints: DomainSpecificBreakpoint[] = [];
     public sourceBreakpoints: Map<number, DebugProtocol.SourceBreakpoint> = new Map();
     public breakpointTypes: Map<string, BreakpointType> = new Map();
 
+    /** Current status regarding the initialization of the runtime. */
+    private initializationStatus: InitializationStatus = new InitializationStatus();
+
     public async getChildren(element?: TreeItem<TreeDataProvider> | undefined): Promise<TreeItem<TreeDataProvider>[] | null | undefined> {
         if (element) return element.getChildren();
 
         return [new DomainSpecificBreakpointsList(this), new StandaloneBreakpointTypesList(this)];
+    }
+
+    public initialize(sourceFile: string): void {
+        this._sourceFile = sourceFile;
+        this.initializationStatus.setTrue();
+    }
+
+    /**
+     * Waits for the initialization of the runtime to be completed.
+     */
+    public async waitForInitialization(): Promise<void> {
+        return this.initializationStatus.wait();
+    }
+
+    public get sourceFile(): string {
+        return this._sourceFile;
     }
 }
 
@@ -95,5 +114,26 @@ export class ParameterizedBreakpointTypeTreeItem extends BreakpointTypeTreeItem 
 export class StandaloneBreakpointTypeTreeItem extends BreakpointTypeTreeItem {
     constructor(breakpointTypeId: string, name: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider, description?: string) {
         super(breakpointTypeId, name, isEnabled, true, provider, description);
+    }
+}
+
+class InitializationStatus {
+    private done: boolean = false;
+    private resolveFuncs: (() => void)[] = [];
+
+    public setTrue(): void {
+        this.done = true;
+        this.resolveFuncs.forEach(resolve => resolve());
+        this.resolveFuncs = [];
+    }
+
+    public async wait(): Promise<void> {
+        return new Promise<void>(resolve => {
+            if (this.done) {
+                resolve();
+            } else {
+                this.resolveFuncs.push(resolve);
+            }
+        });
     }
 }
