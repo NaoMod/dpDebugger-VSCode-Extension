@@ -29,9 +29,10 @@ export abstract class TreeDataProvider implements vscode.TreeDataProvider<TreeIt
 export abstract class TreeItem<T extends TreeDataProvider> extends vscode.TreeItem {
     protected _provider: T;
 
-    constructor(label: string | vscode.TreeItemLabel, provider: T, collapsibleState?: vscode.TreeItemCollapsibleState) {
+    constructor(label: string | vscode.TreeItemLabel, provider: T, collapsibleState?: vscode.TreeItemCollapsibleState, command?: vscode.Command) {
         super(label, collapsibleState);
         this._provider = provider;
+        this.command = command;
     }
 
     /**
@@ -51,8 +52,8 @@ export abstract class TreeItem<T extends TreeDataProvider> extends vscode.TreeIt
  * Leaf item of a tree view, which has no children.
  */
 export abstract class LeafTreeItem extends TreeItem<TreeDataProvider> {
-    constructor(name: string, isEnabled: boolean, provider: TreeDataProvider, description?: string) {
-        super(name, provider, vscode.TreeItemCollapsibleState.None);
+    constructor(name: string, isEnabled: boolean, provider: TreeDataProvider, description?: string, command?: vscode.Command) {
+        super(name, provider, vscode.TreeItemCollapsibleState.None, command);
         this.description = description;
         this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;
     }

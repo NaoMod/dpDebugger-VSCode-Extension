@@ -3,6 +3,7 @@ import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSt
 import { DomainSpecificBreakpoint, GetBreakpointTypesResponse, GetDomainSpecificBreakpointsResponse, GetEnabledStandaloneBreakpointTypesResponse } from './DAPExtension';
 import { BreakpointTypeTreeItem, DomainSpecificBreakpointsProvider, ParameterizedBreakpointTypeTreeItem, StandaloneBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
 import { InvalidatedStacksDebugAdapterTrackerFactory, SetBreakpointsDebugAdapterTrackerFactory, StoppedDebugAdapterTrackerFactory } from './trackers';
+import path = require('path');
 
 export class DebugSetup {
     /**
@@ -22,6 +23,8 @@ export class DebugSetup {
         const setBreakpointsTrackerfactory: SetBreakpointsDebugAdapterTrackerFactory = new SetBreakpointsDebugAdapterTrackerFactory(domainSpecificBreakpointProvider);
 
         this.registerTrackers(context, stoppedTrackerFactory, invalidatedStacksTrackerFactory, setBreakpointsTrackerfactory);
+
+        this.registerCommands(context);
 
         context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
     }
@@ -55,7 +58,7 @@ export class DebugSetup {
                     } else {
                         enabledStandaloneBreakpointTypes.delete(treeItem.breakpointTypeId);
                     }
-                } 
+                }
                 // I would put an 'else' here byt the type checker won't let me :(
                 if (this.isParameterizedBreakpointTypeTreeItem(treeItem)) {
                     const domainSpecificBreakpoint: DomainSpecificBreakpoint | undefined = enabledDomainSpecificBreakpoints.find(b => b.sourceBreakpointId === treeItem.sourceBreakpointId);
@@ -96,7 +99,7 @@ export class DebugSetup {
                 const getEnabledStandaloneBreakpointTypesResponse: GetEnabledStandaloneBreakpointTypesResponse = await vscode.debug.activeDebugSession.customRequest('getEnabledStandaloneBreakpointTypes', { sourceFile: provider.sourceFile });
                 provider.enabledStandaloneBreakpointTypes = new Set(getEnabledStandaloneBreakpointTypesResponse.enabledStandaloneBreakpointTypesIds);
 
-                
+
 
                 provider.refresh(undefined)
             }),
@@ -129,6 +132,14 @@ export class DebugSetup {
         context.subscriptions.push(treeView);
 
         return provider;
+    }
+
+    private registerCommands(context: vscode.ExtensionContext): void {
+        context.subscriptions.push(vscode.commands.registerCommand('focusLine', (filePath: string, line: number) => {
+            const fileUri: vscode.Uri = vscode.Uri.file(filePath);
+            const position: vscode.Position = new vscode.Position(line - 1, 0);
+            vscode.window.showTextDocument(fileUri, { selection: new vscode.Selection(position, position) });
+        }));
     }
 
     private isStandaloneBreakpointTypeTreeItem(item: BreakpointTypeTreeItem): item is StandaloneBreakpointTypeTreeItem {

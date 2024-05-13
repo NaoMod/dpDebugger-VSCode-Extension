@@ -57,9 +57,14 @@ class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpoint
         const fileName: string = provider.sourceFile.substring(fileNameStart + 1);
         const sourceBreakpoint: DebugProtocol.SourceBreakpoint | undefined = provider.sourceBreakpoints.get(domainSpecificBreakpoint.sourceBreakpointId);
         if (sourceBreakpoint === undefined || sourceBreakpoint.column === undefined) throw new Error(`Problem with source breakpoint ${domainSpecificBreakpoint.sourceBreakpointId}.`);
-        const label: string = `${fileName} (${sourceBreakpoint.line}:${sourceBreakpoint.column})`;
-        super(label, provider, vscode.TreeItemCollapsibleState.Collapsed);
+        const command: vscode.Command = {
+            command: 'focusLine',
+            title: 'Focus Line',
+            arguments: [provider.sourceFile, sourceBreakpoint.line]
+        };
+        super(fileName, provider, vscode.TreeItemCollapsibleState.Collapsed, command);
         this.domainSpecificBreakpoint = domainSpecificBreakpoint;
+        this.description = `(${sourceBreakpoint.line}:${sourceBreakpoint.column})`;
     }
 
     public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
