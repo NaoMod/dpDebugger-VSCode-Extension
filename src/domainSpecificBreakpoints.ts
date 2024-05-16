@@ -1,6 +1,6 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { BreakpointType, DomainSpecificBreakpoint } from './DAPExtension';
+import { BreakpointType, DomainSpecificBreakpointsFromSourceBreakpoint } from './DAPExtension';
 import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
 
 /**
@@ -9,7 +9,7 @@ import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
 export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     private _sourceFile: string = '';
     public enabledStandaloneBreakpointTypes: Set<string> = new Set();
-    public domainSpecificBreakpoints: DomainSpecificBreakpoint[] = [];
+    public domainSpecificBreakpoints: DomainSpecificBreakpointsFromSourceBreakpoint[] = [];
     public sourceBreakpoints: Map<number, DebugProtocol.SourceBreakpoint> = new Map();
     public breakpointTypes: Map<string, BreakpointType> = new Map();
 
@@ -50,9 +50,9 @@ class DomainSpecificBreakpointsList extends TreeItem<DomainSpecificBreakpointsPr
 }
 
 class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpointsProvider> {
-    private domainSpecificBreakpoint: DomainSpecificBreakpoint;
+    private domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint;
 
-    constructor(domainSpecificBreakpoint: DomainSpecificBreakpoint, provider: DomainSpecificBreakpointsProvider) {
+    constructor(domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint, provider: DomainSpecificBreakpointsProvider) {
         const fileNameStart: number = provider.sourceFile.lastIndexOf('/');
         const fileName: string = provider.sourceFile.substring(fileNameStart + 1);
         const sourceBreakpoint: DebugProtocol.SourceBreakpoint | undefined = provider.sourceBreakpoints.get(domainSpecificBreakpoint.sourceBreakpointId);
@@ -71,7 +71,7 @@ class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpoint
         const matchingBreakpointTypes: BreakpointType[] = Array.from(this._provider.breakpointTypes.values()).filter(breakpointType => breakpointType.targetElementType !== undefined && this.domainSpecificBreakpoint.targetElementTypes.includes(breakpointType.targetElementType));
 
         return matchingBreakpointTypes.map(breakpointType => {
-            const isEnabled: boolean = this.domainSpecificBreakpoint.enabledBreakpointTypeIds.includes(breakpointType.id);
+            const isEnabled: boolean = this.domainSpecificBreakpoint.enabledBreakpointTypesIds.includes(breakpointType.id);
             return new ParameterizedBreakpointTypeTreeItem(this.domainSpecificBreakpoint.sourceBreakpointId, breakpointType.targetElementType!, breakpointType.id, breakpointType.name, isEnabled, this._provider, breakpointType.description);
         });
     }

@@ -1,6 +1,6 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { DomainSpecificBreakpoint, GetDomainSpecificBreakpointsResponse } from './DAPExtension';
+import { DomainSpecificBreakpointsFromSourceBreakpoint, GetDomainSpecificBreakpointsResponse } from './DAPExtension';
 import { DomainSpecificBreakpointsProvider } from './domainSpecificBreakpoints';
 import { TreeDataProvider } from './treeItem';
 
@@ -133,7 +133,7 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             const sourceBreakpointId: number | undefined = setBreakpointsResponse.body.breakpoints[i].id;
             if (sourceBreakpointId === undefined) throw new Error('Undefined ID for verified source breakpoint.');
 
-            const domainSpecificBreakpoint: DomainSpecificBreakpoint | undefined = getDomainSpecificBreakpointsResponse.breakpoints.find(b => b.sourceBreakpointId === sourceBreakpointId);
+            const domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint | undefined = getDomainSpecificBreakpointsResponse.breakpoints.find(b => b.sourceBreakpointId === sourceBreakpointId);
             if (domainSpecificBreakpoint === undefined) throw new Error(`Undefined domain-specific breakpoint for source breakpoint ${sourceBreakpointId}.`);
 
             this.domainSpecificBreakpointProvider.sourceBreakpoints.set(sourceBreakpointId, sourceBreakpoint);

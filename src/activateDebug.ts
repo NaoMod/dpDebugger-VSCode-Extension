@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSteps';
-import { DomainSpecificBreakpoint, GetBreakpointTypesResponse, GetDomainSpecificBreakpointsResponse, GetEnabledStandaloneBreakpointTypesResponse } from './DAPExtension';
+import { DomainSpecificBreakpointsFromSourceBreakpoint, GetBreakpointTypesResponse, GetDomainSpecificBreakpointsResponse, GetEnabledStandaloneBreakpointTypesResponse } from './DAPExtension';
 import { BreakpointTypeTreeItem, DomainSpecificBreakpointsProvider, ParameterizedBreakpointTypeTreeItem, StandaloneBreakpointTypeTreeItem } from './domainSpecificBreakpoints';
 import { InvalidatedStacksDebugAdapterTrackerFactory, SetBreakpointsDebugAdapterTrackerFactory, StoppedDebugAdapterTrackerFactory } from './trackers';
 import path = require('path');
@@ -47,7 +47,7 @@ export class DebugSetup {
 
             const enabledStandaloneBreakpointTypes: Set<string> = new Set(provider.enabledStandaloneBreakpointTypes);
             // TODO: deep clone
-            const enabledDomainSpecificBreakpoints: DomainSpecificBreakpoint[] = Array.from(provider.domainSpecificBreakpoints);
+            const enabledDomainSpecificBreakpoints: DomainSpecificBreakpointsFromSourceBreakpoint[] = Array.from(provider.domainSpecificBreakpoints);
 
             for (const item of event.items) {
                 const treeItem: BreakpointTypeTreeItem = item[0] as BreakpointTypeTreeItem;
@@ -61,23 +61,26 @@ export class DebugSetup {
                 }
                 // I would put an 'else' here byt the type checker won't let me :(
                 if (this.isParameterizedBreakpointTypeTreeItem(treeItem)) {
-                    const domainSpecificBreakpoint: DomainSpecificBreakpoint | undefined = enabledDomainSpecificBreakpoints.find(b => b.sourceBreakpointId === treeItem.sourceBreakpointId);
+                    const domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint | undefined = enabledDomainSpecificBreakpoints.find(b => b.sourceBreakpointId === treeItem.sourceBreakpointId);
                     if (domainSpecificBreakpoint === undefined) throw new Error(`Undefined domain-specific breakpoint for source breakpoint ${treeItem.sourceBreakpointId}.`);
 
                     if (item[1] === vscode.TreeItemCheckboxState.Checked) {
-                        if (!domainSpecificBreakpoint.enabledBreakpointTypeIds.includes(treeItem.breakpointTypeId)) domainSpecificBreakpoint.enabledBreakpointTypeIds.push(treeItem.breakpointTypeId);
+                        if (!domainSpecificBreakpoint.enabledBreakpointTypesIds.includes(treeItem.breakpointTypeId)) domainSpecificBreakpoint.enabledBreakpointTypesIds.push(treeItem.breakpointTypeId);
                     } else {
-                        const breakpointTypeIndex: number = domainSpecificBreakpoint.enabledBreakpointTypeIds.findIndex(id => id === treeItem.breakpointTypeId);
-                        if (breakpointTypeIndex !== -1) domainSpecificBreakpoint.enabledBreakpointTypeIds.splice(breakpointTypeIndex, 1);
+                        const breakpointTypeIndex: number = domainSpecificBreakpoint.enabledBreakpointTypesIds.findIndex(id => id === treeItem.breakpointTypeId);
+                        if (breakpointTypeIndex !== -1) domainSpecificBreakpoint.enabledBreakpointTypesIds.splice(breakpointTypeIndex, 1);
                     }
                 }
             }
 
-            await vscode.debug.activeDebugSession.customRequest('enableStandaloneBreakpointTypes', { sourceFile: sourceFile, breakpointTypeIds: Array.from(enabledStandaloneBreakpointTypes) });
+            await vscode.debug.activeDebugSession.customRequest('enableStandaloneBreakpointTypes', { sourceFile: sourceFile, breakpointTypesIds: Array.from(enabledStandaloneBreakpointTypes) });
             const getEnabledStandaloneBreakpointTypesResponse: GetEnabledStandaloneBreakpointTypesResponse = await vscode.debug.activeDebugSession.customRequest('getEnabledStandaloneBreakpointTypes', { sourceFile: sourceFile });
             provider.enabledStandaloneBreakpointTypes = new Set(getEnabledStandaloneBreakpointTypesResponse.enabledStandaloneBreakpointTypesIds);
 
-            await vscode.debug.activeDebugSession.customRequest('setDomainSpecificBreakpoints', { sourceFile: sourceFile, breakpoints: enabledDomainSpecificBreakpoints });
+            await vscode.debug.activeDebugSession.customRequest('setDomainSpecificBreakpoints', {
+                sourceFile: sourceFile,
+                breakpoints: enabledDomainSpecificBreakpoints.map(b => ({ sourceBreakpointId: b.sourceBreakpointId, enabledBreakpointTypesIds: b.enabledBreakpointTypesIds }))
+            });
             const getDomainSpecificBreakpointsResponse: GetDomainSpecificBreakpointsResponse = await vscode.debug.activeDebugSession.customRequest('getDomainSpecificBreakpoints', { sourceFile: sourceFile });
             provider.domainSpecificBreakpoints = getDomainSpecificBreakpointsResponse.breakpoints;
 
