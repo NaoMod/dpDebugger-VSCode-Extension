@@ -1,6 +1,6 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { BreakpointType, DomainSpecificBreakpointsFromSourceBreakpoint } from './DAPExtension';
+import { BreakpointType, DomainSpecificBreakpointsFromSourceBreakpoint, SourceBreakpointTargetTypes } from './DAPExtension';
 import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
 
 /**
@@ -11,6 +11,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     public enabledStandaloneBreakpointTypes: Set<string> = new Set();
     public domainSpecificBreakpoints: DomainSpecificBreakpointsFromSourceBreakpoint[] = [];
     public sourceBreakpoints: Map<number, DebugProtocol.SourceBreakpoint> = new Map();
+    public sourceBreakpointsTargetTypes: SourceBreakpointTargetTypes[] = [];
     public breakpointTypes: Map<string, BreakpointType> = new Map();
 
     /** Current status regarding the initialization of the runtime. */
@@ -68,7 +69,10 @@ class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpoint
     }
 
     public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
-        const matchingBreakpointTypes: BreakpointType[] = Array.from(this._provider.breakpointTypes.values()).filter(breakpointType => breakpointType.targetElementType !== undefined && this.domainSpecificBreakpoint.targetElementTypes.includes(breakpointType.targetElementType));
+        const targetTypes: SourceBreakpointTargetTypes | undefined = this._provider.sourceBreakpointsTargetTypes.find(targetTypes => targetTypes.sourceBreakpointId === this.domainSpecificBreakpoint.sourceBreakpointId);
+        if (targetTypes === undefined) return undefined;
+
+        const matchingBreakpointTypes: BreakpointType[] = Array.from(this._provider.breakpointTypes.values()).filter(breakpointType => breakpointType.targetElementType !== undefined && targetTypes.types.includes(breakpointType.targetElementType));
 
         return matchingBreakpointTypes.map(breakpointType => {
             const isEnabled: boolean = this.domainSpecificBreakpoint.enabledBreakpointTypesIds.includes(breakpointType.id);

@@ -1,6 +1,6 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { DomainSpecificBreakpointsFromSourceBreakpoint, GetDomainSpecificBreakpointsResponse } from './DAPExtension';
+import { DomainSpecificBreakpointsFromSourceBreakpoint, GetDomainSpecificBreakpointsResponse, GetSourceBreakpointsTargetTypesResponse } from './DAPExtension';
 import { DomainSpecificBreakpointsProvider } from './domainSpecificBreakpoints';
 import { TreeDataProvider } from './treeItem';
 
@@ -139,6 +139,9 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             this.domainSpecificBreakpointProvider.sourceBreakpoints.set(sourceBreakpointId, sourceBreakpoint);
             this.domainSpecificBreakpointProvider.domainSpecificBreakpoints.push(domainSpecificBreakpoint);
         }
+
+        const getSourceBreakpointTargetTypesResponse: GetSourceBreakpointsTargetTypesResponse = await vscode.debug.activeDebugSession.customRequest('getSourceBreakpointsTargetTypes', { sourceFile: sourceFile, sourceBreakpointsIds: this.domainSpecificBreakpointProvider.domainSpecificBreakpoints.map(b => b.sourceBreakpointId) });
+        this.domainSpecificBreakpointProvider.sourceBreakpointsTargetTypes = getSourceBreakpointTargetTypesResponse.sourceBreakpointTargetTypes;
 
         this.domainSpecificBreakpointProvider.refresh(undefined);
     }
