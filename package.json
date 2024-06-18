@@ -39,6 +39,79 @@
         }
       ]
     },
+    "commands": [
+      {
+        "command": "domainSpecificBreakpoints.addBreakpoint",
+        "title": "Add Breakpoint",
+        "icon":{
+          "dark": "icons/add-dark.svg",
+          "light": "icons/add-light.svg"
+        }
+      },
+      {
+        "command": "domainSpecificBreakpoints.removeBreakpoint",
+        "title": "Remove Breakpoint",
+        "icon":{
+          "dark": "icons/close-dark.svg",
+          "light": "icons/close-light.svg"
+        }
+      },
+      {
+        "command": "domainSpecificBreakpoints.changeSingleParameterValue",
+        "title": "Change Value",
+        "icon":{
+          "dark": "icons/edit-dark.svg",
+          "light": "icons/edit-light.svg"
+        }
+      },
+      {
+        "command": "domainSpecificBreakpoints.changeArrayEntry",
+        "title": "Change Entry",
+        "icon":{
+          "dark": "icons/edit-dark.svg",
+          "light": "icons/edit-light.svg"
+        }
+      },
+      {
+        "command": "domainSpecificBreakpoints.removeArrayEntry",
+        "title": "Remove Entry",
+        "icon":{
+          "dark": "icons/close-dark.svg",
+          "light": "icons/close-light.svg"
+        }
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "domainSpecificBreakpoints.addBreakpoint",
+          "group": "navigation",
+          "when": "view === domainSpecificBreakpoints"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "domainSpecificBreakpoints.removeBreakpoint",
+          "group": "inline",
+          "when": "view === domainSpecificBreakpoints && viewItem == breakpoint"
+        },
+        {
+          "command": "domainSpecificBreakpoints.changeSingleParameterValue",
+          "group": "inline",
+          "when": "view === domainSpecificBreakpoints && viewItem == singleParameterValue"
+        },
+        {
+          "command": "domainSpecificBreakpoints.changeArrayEntry",
+          "group": "inline",
+          "when": "view === domainSpecificBreakpoints && viewItem == arrayEntry"
+        },
+        {
+          "command": "domainSpecificBreakpoints.removeArrayEntry",
+          "group": "inline",
+          "when": "view === domainSpecificBreakpoints && viewItem == arrayEntry"
+        }
+      ]
+    },
     "debuggers": [
       {
         "type": "configurable",
@@ -76,10 +149,6 @@
                 "type": "boolean",
                 "description": "True if the program should pause after executing the last step, instead of terminating the debug session.",
                 "default": false
-              },
-              "enabledBreakpointTypeIds": {
-                "type": "array",
-                "description": "Enabled breakpoint types at the start of execution."
               },
               "skipRedundantPauses": {
                 "type": "boolean",

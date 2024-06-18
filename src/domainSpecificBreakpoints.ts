@@ -1,17 +1,15 @@
-import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { BreakpointType, DomainSpecificBreakpointsFromSourceBreakpoint, SourceBreakpointTargetTypes } from './DAPExtension';
-import { LeafTreeItem, TreeDataProvider, TreeItem } from './treeItem';
+import { BreakpointParameter, BreakpointType, ModelElementReference, SetDomainSpecificBreakpointsArguments, SetDomainSpecificBreakpointsResponse } from './DAPExtension';
+import { valuesToEntries } from './transformations';
+import { TreeDataProvider, TreeItem } from './treeItem';
 
 /**
  * Data provider for the 'Domain-Specific Breakpoints' view.
  */
 export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     private _sourceFile: string = '';
-    public enabledStandaloneBreakpointTypes: Set<string> = new Set();
-    public domainSpecificBreakpoints: DomainSpecificBreakpointsFromSourceBreakpoint[] = [];
-    public sourceBreakpoints: Map<number, DebugProtocol.SourceBreakpoint> = new Map();
-    public sourceBreakpointsTargetTypes: SourceBreakpointTargetTypes[] = [];
+    private memorizedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [];
+    private enabledBreakpoints: ViewDomainSpecificBreakpoint[] = [];
     public breakpointTypes: Map<string, BreakpointType> = new Map();
 
     /** Current status regarding the initialization of the runtime. */
@@ -20,12 +18,94 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
     public async getChildren(element?: TreeItem<TreeDataProvider> | undefined): Promise<TreeItem<TreeDataProvider>[] | null | undefined> {
         if (element) return element.getChildren();
 
-        return [new DomainSpecificBreakpointsList(this), new StandaloneBreakpointTypesList(this)];
+        return this.memorizedDomainSpecificBreakpoints.map((breakpoint, i) => new DomainSpecificBreakpointTreeItem(breakpoint, i.toString(), this.enabledBreakpoints.includes(breakpoint), this));
     }
 
-    public initialize(sourceFile: string): void {
+    /**
+     * Requests the creation of a new domain-specific breakpoint.
+     * Refreshes the content of the view.
+     * 
+     * @param breakpoint Breakpoint to create.
+     */
+    public async addBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [...this.enabledBreakpoints, breakpoint];
+        const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
+        this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
+        this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
+        this.refresh(undefined);
+    }
+
+    /**
+     * Deletes an existing domain-specific breakpoint.
+     * Refreshes the content of the view.
+     * 
+     * @param breakpoint Breakpoint to delete.
+     */
+    public async deleteBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
+        this.memorizedDomainSpecificBreakpoints = this.domainSpecificBreakpoints.filter(b => b !== breakpoint);
+        if (!this.enabledBreakpoints.includes(breakpoint)) {
+            this.refresh(undefined);
+            return;
+        }
+
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = this.enabledBreakpoints.filter(b => b !== breakpoint);
+        const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
+        this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
+        this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
+        this.refresh(undefined);
+    }
+
+    /**
+     * Enables an existing domain-specific breakpoint.
+     * Refreshes the content of the view.
+     * 
+     * @param breakpoint Breakpoint to enable.
+     */
+    public async enableBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
+        if (this.enabledBreakpoints.includes(breakpoint)) return;
+
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [...this.enabledBreakpoints, breakpoint];
+        const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
+        this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
+        this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
+        this.refresh(undefined);
+    }
+
+    /**
+     * Disables an existing domain-specific breakpoint.
+     * Refreshes the content of the view.
+     * 
+     * @param breakpoint Breakpoint to disable.
+     */
+    public async disableBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
+        if (!this.enabledBreakpoints.includes(breakpoint)) return;
+
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = this.enabledBreakpoints.filter(b => b !== breakpoint);
+        const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
+        this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
+        this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
+        this.refresh(undefined);
+    }
+
+    public async validateBreakpoints(): Promise<void> {
+        await this.requestBreakpointsCreation(this.enabledBreakpoints);
+    }
+
+    public initialize(sourceFile: string, breakpointTypes: BreakpointType[]): void {
         this._sourceFile = sourceFile;
+        this.breakpointTypes.clear();
+        for (const breakpointType of breakpointTypes) {
+            this.breakpointTypes.set(breakpointType.id, breakpointType);
+        }
         this.initializationStatus.setTrue();
+    }
+
+    public terminate(): void {
+        this._sourceFile = '';
+        this.memorizedDomainSpecificBreakpoints = [];
+        this.breakpointTypes.clear();
+        this.enabledBreakpoints = [];
+        this.initializationStatus = new InitializationStatus();
     }
 
     /**
@@ -35,95 +115,212 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
         return this.initializationStatus.wait();
     }
 
+    public get domainSpecificBreakpoints(): ViewDomainSpecificBreakpoint[] {
+        return Array.from(this.memorizedDomainSpecificBreakpoints);
+    }
+
     public get sourceFile(): string {
         return this._sourceFile;
     }
-}
 
-class DomainSpecificBreakpointsList extends TreeItem<DomainSpecificBreakpointsProvider> {
-    constructor(provider: DomainSpecificBreakpointsProvider) {
-        super('Source Breakpoints', provider, vscode.TreeItemCollapsibleState.Collapsed);
+    private updateMemorizedBreakpoints(memorizedBreakpoints: ViewDomainSpecificBreakpoint[], requestedBreakpoints: ViewDomainSpecificBreakpoint[], verifiedBreakpoints: ViewDomainSpecificBreakpoint[]): ViewDomainSpecificBreakpoint[] {
+        const disabledBreakpoints: ViewDomainSpecificBreakpoint[] = memorizedBreakpoints.filter(b => !requestedBreakpoints.includes(b));
+
+        return [...disabledBreakpoints, ...verifiedBreakpoints];
     }
 
-    public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
-        return this._provider.domainSpecificBreakpoints.map(breakpoint => new DomainSpecificBreakpointTreeItem(breakpoint, this._provider));
-    }
-}
+    private async requestBreakpointsCreation(requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[]): Promise<ViewDomainSpecificBreakpoint[]> {
+        if (vscode.debug.activeDebugSession === undefined) throw new Error('Undefined debug session.');
 
-class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpointsProvider> {
-    private domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint;
-
-    constructor(domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint, provider: DomainSpecificBreakpointsProvider) {
-        const fileNameStart: number = provider.sourceFile.lastIndexOf('/');
-        const fileName: string = provider.sourceFile.substring(fileNameStart + 1);
-        const sourceBreakpoint: DebugProtocol.SourceBreakpoint | undefined = provider.sourceBreakpoints.get(domainSpecificBreakpoint.sourceBreakpointId);
-        if (sourceBreakpoint === undefined || sourceBreakpoint.column === undefined) throw new Error(`Problem with source breakpoint ${domainSpecificBreakpoint.sourceBreakpointId}.`);
-        const command: vscode.Command = {
-            command: 'focusLine',
-            title: 'Focus Line',
-            arguments: [provider.sourceFile, sourceBreakpoint.line]
+        const args: SetDomainSpecificBreakpointsArguments = {
+            sourceFile: vscode.debug.activeDebugSession.configuration.sourceFile,
+            breakpoints: requestedDomainSpecificBreakpoints.map(b => ({
+                breakpointTypeId: b.breakpointType.id,
+                params: valuesToEntries(b.values)
+            }))
         };
-        super(fileName, provider, vscode.TreeItemCollapsibleState.Collapsed, command);
-        this.domainSpecificBreakpoint = domainSpecificBreakpoint;
-        this.description = `(${sourceBreakpoint.line}:${sourceBreakpoint.column})`;
+        const response: SetDomainSpecificBreakpointsResponse = await vscode.debug.activeDebugSession.customRequest('setDomainSpecificBreakpoints', args);
+        if (requestedDomainSpecificBreakpoints.length !== response.breakpoints.length) throw new Error(`Requested the creation of ${requestedDomainSpecificBreakpoints.length} breakpoints, but got a response for ${response.breakpoints.length}.`);
+
+
+        const newDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [];
+        for (let i = 0; i < requestedDomainSpecificBreakpoints.length; i++) {
+            if (response.breakpoints[i].verified) newDomainSpecificBreakpoints.push(requestedDomainSpecificBreakpoints[i]);
+        }
+
+        if (newDomainSpecificBreakpoints.length < requestedDomainSpecificBreakpoints.length) vscode.window.showErrorMessage(`${requestedDomainSpecificBreakpoints.length - newDomainSpecificBreakpoints.length} breakpoints could not be set.`);
+
+        return newDomainSpecificBreakpoints;
+    }
+}
+
+export type ViewDomainSpecificBreakpoint = {
+    breakpointType: BreakpointType;
+    values: Map<string, Value>;
+}
+
+export class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpointsProvider> {
+    readonly breakpoint: ViewDomainSpecificBreakpoint;
+
+    constructor(breakpoint: ViewDomainSpecificBreakpoint, label: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider) {
+        super(label, provider, vscode.TreeItemCollapsibleState.Collapsed);
+        this.breakpoint = breakpoint;
+        this.description = breakpoint.breakpointType.name;
+        this.checkboxState = isEnabled ? vscode.TreeItemCheckboxState.Checked : vscode.TreeItemCheckboxState.Unchecked;
+        this.contextValue = 'breakpoint';
     }
 
     public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
-        const targetTypes: SourceBreakpointTargetTypes | undefined = this._provider.sourceBreakpointsTargetTypes.find(targetTypes => targetTypes.sourceBreakpointId === this.domainSpecificBreakpoint.sourceBreakpointId);
-        if (targetTypes === undefined) return undefined;
+        return this.breakpoint.breakpointType.parameters.map(p => {
+            const value: Value | undefined = this.breakpoint.values.get(p.name);
+            if (value === undefined) throw new Error(`Undefined value for parameter ${p.name}.`);
 
-        const matchingBreakpointTypes: BreakpointType[] = Array.from(this._provider.breakpointTypes.values()).filter(breakpointType => breakpointType.targetElementType !== undefined && targetTypes.types.includes(breakpointType.targetElementType));
-
-        return matchingBreakpointTypes.map(breakpointType => {
-            const isEnabled: boolean = this.domainSpecificBreakpoint.enabledBreakpointTypesIds.includes(breakpointType.id);
-            return new ParameterizedBreakpointTypeTreeItem(this.domainSpecificBreakpoint.sourceBreakpointId, breakpointType.targetElementType!, breakpointType.id, breakpointType.name, isEnabled, this._provider, breakpointType.description);
+            return value.isMultivalued ? new ArrayValueTreeItem(p, value, this._provider) : new SingleValueTreeItem(p, value, this._provider);
         });
     }
 }
 
-class StandaloneBreakpointTypesList extends TreeItem<DomainSpecificBreakpointsProvider> {
+export abstract class ValueTreeItem extends TreeItem<DomainSpecificBreakpointsProvider> {
+    readonly parameter: BreakpointParameter;
 
-    constructor(provider: DomainSpecificBreakpointsProvider) {
-        super('Standalone Breakpoint Types', provider, vscode.TreeItemCollapsibleState.Collapsed);
+    constructor(parameter: BreakpointParameter, label: string, provider: DomainSpecificBreakpointsProvider, description?: string) {
+        super(label, provider, parameter.isMultivalued ? vscode.TreeItemCollapsibleState.Collapsed : undefined);
+        this.description = description;
+        this.parameter = parameter;
+    }
+}
+
+export class SingleValueTreeItem extends ValueTreeItem {
+    private value: SingleValue;
+
+    constructor(parameter: BreakpointParameter, value: SingleValue, provider: DomainSpecificBreakpointsProvider) {
+        const label: string = parameter.type === 'primitive' ? `${parameter.name}: ${parameter.primitiveType}` : `${parameter.name}: ${parameter.elementType}`;
+        const description: string = value.type === 'primitive' ? JSON.stringify(value.content) : value.content.label;
+
+        super(parameter, label, provider, description);
+        this.value = value;
+        this.contextValue = 'singleParameterValue';
     }
 
     public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
-        return Array.from(this._provider.breakpointTypes.values()).filter(breakpointType => breakpointType.targetElementType === undefined).map(standaloneBreakpointType => new StandaloneBreakpointTypeTreeItem(
-            standaloneBreakpointType.id,
-            standaloneBreakpointType.name,
-            this._provider.enabledStandaloneBreakpointTypes.has(standaloneBreakpointType.id),
-            this._provider,
-            standaloneBreakpointType.description
-        ));
+        return undefined;
+    }
+
+    public changeValue(newValue: SingleValue): void {
+        if (this.value.type !== newValue.type) return;
+        if (this.value.type === 'primitive' && newValue.type === 'primitive' && this.value.primitiveType !== newValue.primitiveType) return;
+        if (this.value.type === 'reference' && newValue.type === 'reference' && this.value.elementType !== newValue.elementType) return;
+
+        this.value.content = newValue.content;
+        this.description = this.value.type === 'primitive' ? JSON.stringify(this.value.content) : this.value.content.label;
     }
 }
 
-export abstract class BreakpointTypeTreeItem extends LeafTreeItem {
-    readonly breakpointTypeId: string;
-    readonly isStandalone: boolean;
+export class ArrayValueTreeItem extends ValueTreeItem {
+    private value: ArrayValue;
 
-    constructor(breakpointTypeId: string, name: string, isEnabled: boolean, isStandalone: boolean, provider: DomainSpecificBreakpointsProvider, description?: string) {
-        super(name, isEnabled, provider, description);
-        this.breakpointTypeId = breakpointTypeId;
-        this.isStandalone = isStandalone;
+    constructor(parameter: BreakpointParameter, value: ArrayValue, provider: DomainSpecificBreakpointsProvider) {
+        const label: string = parameter.type === 'primitive' ? `${parameter.name}: ${parameter.primitiveType}[]` : `${parameter.name}: ${parameter.elementType}[]`;
+        super(parameter, label, provider);
+        this.value = value;
+    }
+
+    public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
+        return this.value.content.map((_, i) => new ArrayEntryTreeItem(this.parameter, this.value, i, this._provider));
     }
 }
 
-export class ParameterizedBreakpointTypeTreeItem extends BreakpointTypeTreeItem {
-    readonly sourceBreakpointId: number;
-    readonly targetElementType: string;
+export class ArrayEntryTreeItem extends ValueTreeItem {
+    readonly index: number;
+    private array: ArrayValue;
 
-    constructor(sourceBreakpointId: number, targetElementType: string, breakpointTypeId: string, name: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider, description?: string) {
-        super(breakpointTypeId, name, isEnabled, false, provider, description);
-        this.sourceBreakpointId = sourceBreakpointId;
-        this.targetElementType = targetElementType;
+    constructor(parameter: BreakpointParameter, array: ArrayValue, index: number, provider: DomainSpecificBreakpointsProvider) {
+        const label: string = array.type === 'primitive' ? `${index}: ${array.content[index]}` : `${index}: ${array.content[index].label}`;
+        super(parameter, label, provider);
+        this.index = index;
+        this.array = array;
+        this.description = array.type === 'primitive' ? JSON.stringify(array.content[index]) : array.content[index].label;
+        this.contextValue = 'arrayEntry';
+    }
+
+    public getChildren(): TreeItem<TreeDataProvider>[] | null | undefined {
+        return undefined;
+    }
+
+    public changeValue(newValue: SingleValue): void {
+        if (this.array.type !== newValue.type) return;
+        if (this.array.type === 'primitive' && newValue.type === 'primitive' && this.array.primitiveType !== newValue.primitiveType) return;
+        if (this.array.type === 'reference' && newValue.type === 'reference' && this.array.elementType !== newValue.elementType) return;
+
+        this.array.content[this.index] = newValue.content;
+        this.description = this.array.type === 'primitive' ? JSON.stringify(this.array.content[this.index]) : this.array.content[this.index].label;
     }
 }
 
-export class StandaloneBreakpointTypeTreeItem extends BreakpointTypeTreeItem {
-    constructor(breakpointTypeId: string, name: string, isEnabled: boolean, provider: DomainSpecificBreakpointsProvider, description?: string) {
-        super(breakpointTypeId, name, isEnabled, true, provider, description);
-    }
+export type Value = ArrayValue | SingleValue;
+
+export type ArrayValue = PrimitiveArrayValue | ReferenceArrayValue;
+
+export type PrimitiveArrayValue = BooleanArrayValue | NumberArrayValue | StringArrayValue;
+
+export type BooleanArrayValue = {
+    type: 'primitive';
+    primitiveType: 'boolean';
+    isMultivalued: true;
+    content: boolean[];
+}
+
+export type NumberArrayValue = {
+    type: 'primitive';
+    primitiveType: 'number';
+    isMultivalued: true;
+    content: number[];
+}
+
+export type StringArrayValue = {
+    type: 'primitive';
+    primitiveType: 'string';
+    isMultivalued: true;
+    content: string[];
+}
+
+export type ReferenceArrayValue = {
+    type: 'reference';
+    elementType: string;
+    isMultivalued: true;
+    content: ModelElementReference[];
+}
+
+export type SingleValue = PrimitiveSingleValue | ReferenceSingleValue;
+
+export type PrimitiveSingleValue = BooleanSingleValue | NumberSingleValue | StringSingleValue;
+
+export type BooleanSingleValue = {
+    type: 'primitive';
+    primitiveType: 'boolean';
+    isMultivalued: false;
+    content: boolean;
+}
+
+export type NumberSingleValue = {
+    type: 'primitive';
+    primitiveType: 'number';
+    isMultivalued: false;
+    content: number;
+}
+
+export type StringSingleValue = {
+    type: 'primitive';
+    primitiveType: 'string';
+    isMultivalued: false;
+    content: string;
+}
+
+export type ReferenceSingleValue = {
+    type: 'reference';
+    elementType: string;
+    isMultivalued: false;
+    content: ModelElementReference;
 }
 
 class InitializationStatus {

@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { GetAvailableStepsResponse } from './DAPExtension';
+import { GetAvailableStepsArguments, GetAvailableStepsResponse } from './DAPExtension';
 import { LeafTreeItem, TreeDataProvider, TreeItem } from "./treeItem";
 
 /**
@@ -10,7 +10,8 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
         if (!vscode.debug.activeDebugSession) return undefined;
         if (element) return element.getChildren();
 
-        const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession.customRequest('getAvailableSteps', { sourceFile: vscode.debug.activeDebugSession.configuration.sourceFile });
+        const args: GetAvailableStepsArguments = { sourceFile: vscode.debug.activeDebugSession.configuration.sourceFile };
+        const response: GetAvailableStepsResponse = await vscode.debug.activeDebugSession.customRequest('getAvailableSteps', args);
 
         return response.availableSteps.map(step => new AvailableStepTreeItem(
             step.id,

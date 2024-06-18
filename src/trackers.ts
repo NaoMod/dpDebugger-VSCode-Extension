@@ -1,7 +1,8 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
-import { DomainSpecificBreakpointsFromSourceBreakpoint, GetDomainSpecificBreakpointsResponse, GetSourceBreakpointsTargetTypesResponse } from './DAPExtension';
-import { DomainSpecificBreakpointsProvider } from './domainSpecificBreakpoints';
+import { BreakpointType, GetModelElementReferenceFromSourceArguments, GetModelElementReferenceFromSourceResponse, ModelElementReference } from './DAPExtension';
+import { pickBreakpointType, pickValueForParameter } from './breakpointValuesPicker';
+import { DomainSpecificBreakpointsProvider, Value } from './domainSpecificBreakpoints';
 import { TreeDataProvider } from './treeItem';
 
 /**
@@ -96,6 +97,7 @@ export class SetBreakpointsDebugAdapterTrackerFactory implements vscode.DebugAda
 export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTracker {
     private requestSeq: number = NaN;
     private submittedSourceBreakpoints: DebugProtocol.SourceBreakpoint[] = [];
+    private validatedSourceBreakpoints: DebugProtocol.SourceBreakpoint[] = [];
 
     constructor(private domainSpecificBreakpointProvider: DomainSpecificBreakpointsProvider) { }
 
@@ -103,6 +105,7 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
         if (message.type !== 'request' || message.command !== 'setBreakpoints') return;
 
         const setBreakpointsRequest = message as DebugProtocol.SetBreakpointsRequest;
+        // FIXME: not sufficient
         await this.domainSpecificBreakpointProvider.waitForInitialization();
         const isRequestOnDebuggedFile: boolean = (setBreakpointsRequest.arguments.source.path !== undefined && setBreakpointsRequest.arguments.source.path === this.domainSpecificBreakpointProvider.sourceFile) || (setBreakpointsRequest.arguments.source.path === undefined && setBreakpointsRequest.arguments.source.name === this.domainSpecificBreakpointProvider.sourceFile);
         if (!isRequestOnDebuggedFile) return;
@@ -111,38 +114,75 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
         this.submittedSourceBreakpoints = setBreakpointsRequest.arguments.breakpoints !== undefined ? setBreakpointsRequest.arguments.breakpoints : [];
     }
 
-    // TODO: fix on first debug session
     public async onDidSendMessage(message: any): Promise<void> {
         if (message.type !== 'response' || message.command !== 'setBreakpoints' || message.request_seq !== this.requestSeq) return;
 
+        await this.domainSpecificBreakpointProvider.waitForInitialization();
+        if (vscode.debug.activeDebugSession === undefined) throw new Error('Undefined debug session.');
+
         const setBreakpointsResponse = message as DebugProtocol.SetBreakpointsResponse;
         if (setBreakpointsResponse.body.breakpoints.length !== this.submittedSourceBreakpoints.length) throw new Error('Number of source breakpoints different in request and response.');
-
-        if (vscode.debug.activeDebugSession === undefined) throw new Error('Undefined debug session.');
-        const sourceFile: string = vscode.debug.activeDebugSession.configuration.sourceFile;
-
-        this.domainSpecificBreakpointProvider.sourceBreakpoints.clear();
-        this.domainSpecificBreakpointProvider.domainSpecificBreakpoints = [];
-
-        const getDomainSpecificBreakpointsResponse: GetDomainSpecificBreakpointsResponse = await vscode.debug.activeDebugSession.customRequest('getDomainSpecificBreakpoints', { sourceFile: sourceFile });
+        const newValidatedSourceBreakpoints: DebugProtocol.SourceBreakpoint[] = [];
+        const vscodeSourceBreakpointsOnFile: vscode.SourceBreakpoint[] = vscode.debug.breakpoints.filter(b => b instanceof vscode.SourceBreakpoint && b.location.uri.path === this.domainSpecificBreakpointProvider.sourceFile) as vscode.SourceBreakpoint[];
+        const toRemove: vscode.Breakpoint[] = [];
 
         for (let i = 0; i < this.submittedSourceBreakpoints.length; i++) {
             if (!setBreakpointsResponse.body.breakpoints[i].verified) continue;
 
             const sourceBreakpoint: DebugProtocol.SourceBreakpoint = this.submittedSourceBreakpoints[i];
-            const sourceBreakpointId: number | undefined = setBreakpointsResponse.body.breakpoints[i].id;
-            if (sourceBreakpointId === undefined) throw new Error('Undefined ID for verified source breakpoint.');
+            newValidatedSourceBreakpoints.push(sourceBreakpoint);
+            if (this.isAlreadyValidated(sourceBreakpoint)) continue;
 
-            const domainSpecificBreakpoint: DomainSpecificBreakpointsFromSourceBreakpoint | undefined = getDomainSpecificBreakpointsResponse.breakpoints.find(b => b.sourceBreakpointId === sourceBreakpointId);
-            if (domainSpecificBreakpoint === undefined) throw new Error(`Undefined domain-specific breakpoint for source breakpoint ${sourceBreakpointId}.`);
+            // pick type and additional arguments
+            const args: GetModelElementReferenceFromSourceArguments = {
+                sourceFile: this.domainSpecificBreakpointProvider.sourceFile,
+                line: this.submittedSourceBreakpoints[i].line,
+                column: this.submittedSourceBreakpoints[i].column!
+            };
+            const response: GetModelElementReferenceFromSourceResponse = await vscode.debug.activeDebugSession.customRequest('getModelElementReferenceFromSource', args);
 
-            this.domainSpecificBreakpointProvider.sourceBreakpoints.set(sourceBreakpointId, sourceBreakpoint);
-            this.domainSpecificBreakpointProvider.domainSpecificBreakpoints.push(domainSpecificBreakpoint);
+            if (response.element === undefined) {
+                toRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                continue;
+            }
+
+            const reference: ModelElementReference = response.element;
+            const possibleBreakpointTypes: BreakpointType[] = [...this.domainSpecificBreakpointProvider.breakpointTypes.values()].filter(bt => bt.parameters.length > 0 && bt.parameters[0].type === "reference" && reference.types.includes(bt.parameters[0].elementType));
+
+            const breakpointType: BreakpointType | undefined = await pickBreakpointType(possibleBreakpointTypes);
+            if (breakpointType === undefined) {
+                toRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                continue;
+            }
+
+            const values: Map<string, Value> = new Map();
+            values.set(breakpointType.parameters[0].name, { type: 'reference', elementType: breakpointType.parameters[0].type, isMultivalued: false, content: reference });
+            for (let j = 1; j < breakpointType.parameters.length; j++) {
+                const value: Value | undefined = await pickValueForParameter(breakpointType.parameters[j]);
+                if (value === undefined) {
+                    toRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                    continue;
+                }
+
+                values.set(breakpointType.parameters[j].name, value);
+            }
+
+            await this.domainSpecificBreakpointProvider.addBreakpoint({ breakpointType: breakpointType, values: values });
         }
 
-        const getSourceBreakpointTargetTypesResponse: GetSourceBreakpointsTargetTypesResponse = await vscode.debug.activeDebugSession.customRequest('getSourceBreakpointsTargetTypes', { sourceFile: sourceFile, sourceBreakpointsIds: this.domainSpecificBreakpointProvider.domainSpecificBreakpoints.map(b => b.sourceBreakpointId) });
-        this.domainSpecificBreakpointProvider.sourceBreakpointsTargetTypes = getSourceBreakpointTargetTypesResponse.sourceBreakpointTargetTypes;
+        this.validatedSourceBreakpoints = newValidatedSourceBreakpoints;
+        this.requestSeq = NaN;
+        vscode.debug.removeBreakpoints(toRemove);
+    }
 
-        this.domainSpecificBreakpointProvider.refresh(undefined);
+    private findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile: vscode.SourceBreakpoint[], line: number, column: number): vscode.SourceBreakpoint {
+        const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = vscodeSourceBreakpointsOnFile.find(b => b.location.range.start.line === line && b.location.range.start.character === column);
+        if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint to remove.');
+
+        return vscodeSourceBreakpoint;
+    }
+
+    private isAlreadyValidated(sourceBreakpoint: DebugProtocol.SourceBreakpoint): boolean {
+        return this.validatedSourceBreakpoints.some(s => s.line === sourceBreakpoint.line && s.column === sourceBreakpoint.column);
     }
 }
