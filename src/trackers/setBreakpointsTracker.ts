@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { BreakpointType, GetModelElementReferenceFromSourceArguments, GetModelElementReferenceFromSourceResponse, ModelElementReference } from '../DAPExtension';
 import { pickBreakpointType, pickValueForParameter } from '../breakpointValuesPicker';
 import { DomainSpecificBreakpointsProvider, Value, ViewDomainSpecificBreakpoint } from '../domainSpecificBreakpoints';
-import { locationEqualsDAP } from '../locationComparator';
+import { findVSCodeSourceBreakpoint, locationEqualsDAP } from '../sourceBreakpointLocator';
 
 /**
  * Factory for {@link SetBreakpointsDebugAdapterTracker}.
@@ -65,7 +65,7 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             if (toRemove !== undefined) domainSpecificBreakpointsToRemove.push(toRemove);
         }
 
-        await this.domainSpecificBreakpointProvider.deleteBreakpoints(domainSpecificBreakpointsToRemove);
+        await this.domainSpecificBreakpointProvider.deleteBreakpoints(domainSpecificBreakpointsToRemove, false);
     }
 
     private async handleSetBreakpointsResponse(setBreakpointsResponse: DebugProtocol.SetBreakpointsResponse): Promise<void> {
@@ -73,7 +73,6 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
 
         if (setBreakpointsResponse.body.breakpoints.length !== this.submittedSourceBreakpoints.length) throw new Error('Number of source breakpoints different in request and response.');
         const newValidatedSourceBreakpoints: DebugProtocol.SourceBreakpoint[] = [];
-        const vscodeSourceBreakpointsOnFile: vscode.SourceBreakpoint[] = vscode.debug.breakpoints.filter(b => b instanceof vscode.SourceBreakpoint && b.location.uri.path === this.domainSpecificBreakpointProvider.sourceFile) as vscode.SourceBreakpoint[];
         const sourceBreakpointsToRemove: vscode.Breakpoint[] = [];
         const domainSpecificBreakpointsToRemove: ViewDomainSpecificBreakpoint[] = [];
 
@@ -98,7 +97,10 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             const response: GetModelElementReferenceFromSourceResponse = await vscode.debug.activeDebugSession.customRequest('getModelElementReferenceFromSource', args);
 
             if (response.element === undefined) {
-                sourceBreakpointsToRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = findVSCodeSourceBreakpoint(this.domainSpecificBreakpointProvider.sourceFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1);
+                if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint.');
+
+                sourceBreakpointsToRemove.push(vscodeSourceBreakpoint);
                 continue;
             }
 
@@ -107,7 +109,10 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
 
             const breakpointType: BreakpointType | undefined = await pickBreakpointType(possibleBreakpointTypes, sourceBreakpoint);
             if (breakpointType === undefined) {
-                sourceBreakpointsToRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = findVSCodeSourceBreakpoint(this.domainSpecificBreakpointProvider.sourceFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1);
+                if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint.');
+
+                sourceBreakpointsToRemove.push(vscodeSourceBreakpoint);
                 continue;
             }
 
@@ -116,7 +121,10 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             for (let j = 1; j < breakpointType.parameters.length; j++) {
                 const value: Value | undefined = await pickValueForParameter(breakpointType.parameters[j]);
                 if (value === undefined) {
-                    sourceBreakpointsToRemove.push(this.findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1));
+                    const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = findVSCodeSourceBreakpoint(this.domainSpecificBreakpointProvider.sourceFile, sourceBreakpoint.line - 1, sourceBreakpoint.column! - 1);
+                    if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint.');
+
+                    sourceBreakpointsToRemove.push(vscodeSourceBreakpoint);
                     continue;
                 }
 
@@ -126,16 +134,9 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             await this.domainSpecificBreakpointProvider.addBreakpoints([{ breakpointType: breakpointType, values: values, sourceBreakpoint: sourceBreakpoint }]);
         }
 
-        this.domainSpecificBreakpointProvider.deleteBreakpoints(domainSpecificBreakpointsToRemove);
+        this.domainSpecificBreakpointProvider.deleteBreakpoints(domainSpecificBreakpointsToRemove, false);
         this.validatedSourceBreakpoints = newValidatedSourceBreakpoints;
         vscode.debug.removeBreakpoints(sourceBreakpointsToRemove);
-    }
-
-    private findVSCodeSourceBreakpoint(vscodeSourceBreakpointsOnFile: vscode.SourceBreakpoint[], line: number, column: number): vscode.SourceBreakpoint {
-        const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = vscodeSourceBreakpointsOnFile.find(b => b.location.range.start.line === line && b.location.range.start.character === column);
-        if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint to remove.');
-
-        return vscodeSourceBreakpoint;
     }
 
     private isAlreadyValidated(sourceBreakpoint: DebugProtocol.SourceBreakpoint): boolean {

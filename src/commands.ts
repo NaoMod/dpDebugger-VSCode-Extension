@@ -22,7 +22,7 @@ export function addBreakpoint(provider: DomainSpecificBreakpointsProvider): () =
 
 export function removeBreakpoint(provider: DomainSpecificBreakpointsProvider): (item: DomainSpecificBreakpointTreeItem) => Promise<void> {
     return async (item: DomainSpecificBreakpointTreeItem) => {
-        await provider.deleteBreakpoints([item.breakpoint]);
+        await provider.deleteBreakpoints([item.breakpoint], true);
     };
 }
 

@@ -1,7 +1,7 @@
 import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
 import { BreakpointParameter, BreakpointType, ModelElementReference, SetDomainSpecificBreakpointsArguments, SetDomainSpecificBreakpointsResponse } from './DAPExtension';
-import { locationEqualsDAP } from './locationComparator';
+import { findVSCodeSourceBreakpoint, locationEqualsDAP } from './sourceBreakpointLocator';
 import { valuesToEntries } from './transformations';
 import { TreeDataProvider, TreeItem } from './treeItem';
 
@@ -43,12 +43,27 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
      * 
      * @param breakpoint Breakpoint to delete.
      */
-    public async deleteBreakpoints(breakpoints: ViewDomainSpecificBreakpoint[]): Promise<void> {
+    public async deleteBreakpoints(breakpoints: ViewDomainSpecificBreakpoint[], removeSourceBreakpoints: boolean): Promise<void> {
         this.memorizedDomainSpecificBreakpoints = this.domainSpecificBreakpoints.filter(b => !breakpoints.includes(b));
         const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = this.enabledBreakpoints.filter(b => !breakpoints.includes(b));
         const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
         this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
         this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
+
+        if (removeSourceBreakpoints) {
+            const sourceBreakpointsToRemove: vscode.Breakpoint[] = [];
+            for (const breakpoint of breakpoints) {
+                if (breakpoint.sourceBreakpoint === undefined) continue;
+    
+                const vscodeSourceBreakpoint: vscode.SourceBreakpoint | undefined = findVSCodeSourceBreakpoint(this.sourceFile, breakpoint.sourceBreakpoint.line - 1, breakpoint.sourceBreakpoint.column! - 1);
+                if (vscodeSourceBreakpoint === undefined) throw new Error('Could not find source breakpoint.');
+    
+                sourceBreakpointsToRemove.push(vscodeSourceBreakpoint);
+            }
+            
+            vscode.debug.removeBreakpoints(sourceBreakpointsToRemove);
+        }
+
         this.refresh(undefined);
     }
 
