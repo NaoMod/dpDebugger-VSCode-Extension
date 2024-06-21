@@ -1,10 +1,12 @@
+import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
 import { BreakpointParameter, BreakpointType, GetModelElementsReferencesArguments, GetModelElementsReferencesResponse, ModelElementReference } from './DAPExtension';
 import { ArrayValue, BooleanArrayValue, BooleanSingleValue, NumberArrayValue, NumberSingleValue, ReferenceArrayValue, ReferenceSingleValue, SingleValue, StringArrayValue, StringSingleValue, Value } from './domainSpecificBreakpoints';
 
-export async function pickBreakpointType(breakpointTypes: BreakpointType[]): Promise<BreakpointType | undefined> {
+export async function pickBreakpointType(breakpointTypes: BreakpointType[], sourceBreakpoint?: DebugProtocol.SourceBreakpoint): Promise<BreakpointType | undefined> {
     const quickPickItems: CustomQuickPickItem<BreakpointType>[] = breakpointTypes.map(bt => ({ label: bt.name, element: bt }));
-    const pickedBreakpointType: CustomQuickPickItem<BreakpointType> | undefined = await vscode.window.showQuickPick(quickPickItems, { title: 'Select Breakpoint Type' });
+    const title: string = sourceBreakpoint === undefined ? 'Select Breakpoint Type' : `Select Breakpoint Type for Breakpoint at (${sourceBreakpoint.line}:${sourceBreakpoint.column})`;
+    const pickedBreakpointType: CustomQuickPickItem<BreakpointType> | undefined = await vscode.window.showQuickPick(quickPickItems, { title: title });
     if (pickedBreakpointType === undefined) return;
 
     return pickedBreakpointType.element;

@@ -1,5 +1,7 @@
+import { DebugProtocol } from '@vscode/debugprotocol';
 import * as vscode from 'vscode';
 import { BreakpointParameter, BreakpointType, ModelElementReference, SetDomainSpecificBreakpointsArguments, SetDomainSpecificBreakpointsResponse } from './DAPExtension';
+import { locationEqualsDAP } from './locationComparator';
 import { valuesToEntries } from './transformations';
 import { TreeDataProvider, TreeItem } from './treeItem';
 
@@ -27,8 +29,8 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
      * 
      * @param breakpoint Breakpoint to create.
      */
-    public async addBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
-        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [...this.enabledBreakpoints, breakpoint];
+    public async addBreakpoints(breakpoints: ViewDomainSpecificBreakpoint[]): Promise<void> {
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = [...this.enabledBreakpoints, ...breakpoints];
         const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
         this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
         this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
@@ -41,14 +43,9 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
      * 
      * @param breakpoint Breakpoint to delete.
      */
-    public async deleteBreakpoint(breakpoint: ViewDomainSpecificBreakpoint): Promise<void> {
-        this.memorizedDomainSpecificBreakpoints = this.domainSpecificBreakpoints.filter(b => b !== breakpoint);
-        if (!this.enabledBreakpoints.includes(breakpoint)) {
-            this.refresh(undefined);
-            return;
-        }
-
-        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = this.enabledBreakpoints.filter(b => b !== breakpoint);
+    public async deleteBreakpoints(breakpoints: ViewDomainSpecificBreakpoint[]): Promise<void> {
+        this.memorizedDomainSpecificBreakpoints = this.domainSpecificBreakpoints.filter(b => !breakpoints.includes(b));
+        const requestedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = this.enabledBreakpoints.filter(b => !breakpoints.includes(b));
         const verifiedDomainSpecificBreakpoints: ViewDomainSpecificBreakpoint[] = await this.requestBreakpointsCreation(requestedDomainSpecificBreakpoints);
         this.enabledBreakpoints = verifiedDomainSpecificBreakpoints;
         this.memorizedDomainSpecificBreakpoints = this.updateMemorizedBreakpoints(this.memorizedDomainSpecificBreakpoints, requestedDomainSpecificBreakpoints, verifiedDomainSpecificBreakpoints);
@@ -87,6 +84,13 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
         this.refresh(undefined);
     }
 
+    public findBreakpointFromSource(sourceBreakpoint: DebugProtocol.SourceBreakpoint): ViewDomainSpecificBreakpoint | undefined {
+        if (sourceBreakpoint.column === undefined) return undefined;
+
+        //TODO: check source file
+        return this.memorizedDomainSpecificBreakpoints.find(b => b.sourceBreakpoint !== undefined && locationEqualsDAP(sourceBreakpoint, b.sourceBreakpoint));
+    }
+
     public async validateBreakpoints(): Promise<void> {
         await this.requestBreakpointsCreation(this.enabledBreakpoints);
     }
@@ -107,6 +111,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
         this.enabledBreakpoints = [];
         this.initializationStatus = new InitializationStatus();
     }
+
 
     /**
      * Waits for the initialization of the runtime to be completed.
@@ -157,6 +162,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
 export type ViewDomainSpecificBreakpoint = {
     breakpointType: BreakpointType;
     values: Map<string, Value>;
+    sourceBreakpoint?: DebugProtocol.SourceBreakpoint;
 }
 
 export class DomainSpecificBreakpointTreeItem extends TreeItem<DomainSpecificBreakpointsProvider> {

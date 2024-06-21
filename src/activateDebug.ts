@@ -3,7 +3,9 @@ import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSt
 import { addBreakpoint, changeArrayEntry, changeSingleParameterValue, removeBreakpoint } from './commands';
 import { EnableStepArguments, GetBreakpointTypesArguments, GetBreakpointTypesResponse } from './DAPExtension';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTreeItem } from './domainSpecificBreakpoints';
-import { InvalidatedStacksDebugAdapterTrackerFactory, SetBreakpointsDebugAdapterTrackerFactory, StoppedDebugAdapterTrackerFactory } from './trackers';
+import { InvalidatedStacksDebugAdapterTrackerFactory } from './trackers/invalidatedTracker';
+import { SetBreakpointsDebugAdapterTrackerFactory } from './trackers/setBreakpointsTracker';
+import { StoppedDebugAdapterTrackerFactory } from './trackers/stoppedTracker';
 import path = require('path');
 
 export class DebugSetup {
@@ -73,7 +75,7 @@ export class DebugSetup {
             vscode.debug.onDidChangeBreakpoints(event => {
                 for (const breakpoint of event.added) {
                     if (!(breakpoint instanceof vscode.SourceBreakpoint)) continue;
-                    
+
                 }
 
                 for (const breakpoint of event.added) {

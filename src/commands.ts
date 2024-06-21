@@ -16,13 +16,13 @@ export function addBreakpoint(provider: DomainSpecificBreakpointsProvider): () =
             values.set(parameter.name, value);
         }
 
-        await provider.addBreakpoint({ breakpointType: breakpointType, values: values });
+        await provider.addBreakpoints([{ breakpointType: breakpointType, values: values }]);
     };
 }
 
 export function removeBreakpoint(provider: DomainSpecificBreakpointsProvider): (item: DomainSpecificBreakpointTreeItem) => Promise<void> {
     return async (item: DomainSpecificBreakpointTreeItem) => {
-        await provider.deleteBreakpoint(item.breakpoint);
+        await provider.deleteBreakpoints([item.breakpoint]);
     };
 }
 
