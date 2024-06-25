@@ -150,11 +150,6 @@
                 "description": "True if the program should pause after executing the last step, instead of terminating the debug session.",
                 "default": false
               },
-              "skipRedundantPauses": {
-                "type": "boolean",
-                "description": "True if the program should pause multiple times on the same runtime state for different reasons (e.g. multiple breakpoints, choice...).",
-                "default": false
-              },
               "additionalArgs": {
                 "type": "object",
                 "description": "Additional arguments that may be required for specific languages."
