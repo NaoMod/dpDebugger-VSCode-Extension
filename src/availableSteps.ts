@@ -16,7 +16,7 @@ export class AvailableStepsDataProvider extends TreeDataProvider {
         return response.availableSteps.map(step => new AvailableStepTreeItem(
             step.id,
             step.name,
-            step.isEnabled,
+            step.isSelected,
             this,
             step.description
         ));

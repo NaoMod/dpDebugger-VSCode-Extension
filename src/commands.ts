@@ -38,7 +38,7 @@ export async function changeArrayEntry(item: ArrayEntryTreeItem): Promise<void> 
     const title: string = `Select New Value for ${item.parameter.name}[${item.index}]`;
     let newValue: SingleValue | undefined = undefined;
 
-    if (item.parameter.type === 'reference') {
+    if (item.parameter.type === 'element') {
         newValue = await pickSingleReference(title, item.parameter.elementType);
     } else {
         switch (item.parameter.primitiveType) {

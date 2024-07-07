@@ -105,7 +105,7 @@ export class SetBreakpointsDebugAdapterTracker implements vscode.DebugAdapterTra
             }
 
             const reference: ModelElementReference = response.element;
-            const possibleBreakpointTypes: BreakpointType[] = [...this.domainSpecificBreakpointProvider.breakpointTypes.values()].filter(bt => bt.parameters.length > 0 && bt.parameters[0].type === "reference" && reference.types.includes(bt.parameters[0].elementType));
+            const possibleBreakpointTypes: BreakpointType[] = [...this.domainSpecificBreakpointProvider.breakpointTypes.values()].filter(bt => bt.parameters.length > 0 && bt.parameters[0].type === "element" && reference.types.includes(bt.parameters[0].elementType));
 
             const breakpointType: BreakpointType | undefined = await pickBreakpointType(possibleBreakpointTypes, sourceBreakpoint);
             if (breakpointType === undefined) {

@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { AvailableStepsDataProvider, AvailableStepTreeItem } from './availableSteps';
 import { addBreakpoint, changeArrayEntry, changeSingleParameterValue, removeBreakpoint } from './commands';
-import { EnableStepArguments, GetBreakpointTypesArguments, GetBreakpointTypesResponse } from './DAPExtension';
+import { GetBreakpointTypesArguments, GetBreakpointTypesResponse, SelectStepArguments } from './DAPExtension';
 import { DomainSpecificBreakpointsProvider, DomainSpecificBreakpointTreeItem } from './domainSpecificBreakpoints';
 import { InvalidatedStacksDebugAdapterTrackerFactory } from './trackers/invalidatedTracker';
 import { SetBreakpointsDebugAdapterTrackerFactory } from './trackers/setBreakpointsTracker';
@@ -106,8 +106,8 @@ export class DebugSetup {
             for (const item of event.items) {
                 const step: AvailableStepTreeItem = item[0] as AvailableStepTreeItem;
                 if (item[1] === vscode.TreeItemCheckboxState.Checked) {
-                    const args: EnableStepArguments = { sourceFile: sourceFile, stepId: step.stepId };
-                    await vscode.debug.activeDebugSession.customRequest('enableStep', args);
+                    const args: SelectStepArguments = { sourceFile: sourceFile, stepId: step.stepId };
+                    await vscode.debug.activeDebugSession.customRequest('selectStep', args);
                 }
             }
 

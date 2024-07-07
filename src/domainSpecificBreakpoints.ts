@@ -156,7 +156,7 @@ export class DomainSpecificBreakpointsProvider extends TreeDataProvider {
             sourceFile: vscode.debug.activeDebugSession.configuration.sourceFile,
             breakpoints: requestedDomainSpecificBreakpoints.map(b => ({
                 breakpointTypeId: b.breakpointType.id,
-                params: valuesToEntries(b.values)
+                entries: valuesToEntries(b.values)
             }))
         };
         const response: SetDomainSpecificBreakpointsResponse = await vscode.debug.activeDebugSession.customRequest('setDomainSpecificBreakpoints', args);
