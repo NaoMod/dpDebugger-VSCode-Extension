@@ -1,0 +1,43 @@
+StateMachine ComplexLights {
+    INITIAL -> Idle;
+
+    state Idle {
+        -> Normal: 'start' / { t = 0; };
+    }
+
+    composite state Normal {
+        -> Broken: 'break';
+        INITIAL -> GreenN;
+
+        state GreenN {
+            -> GreenN: 'tick' [t<5] / { t = t+1; };
+
+            -> OrangeN: 'tick' [t=5] / { t = 0; };
+        }
+
+        state OrangeN {
+            -> OrangeN: 'tick' [t<5] / { t = t+1; };
+
+            -> RedN: 'tick' [t=5] / { t = 0; };
+        }
+
+        state RedN {
+            -> RedN: 'tick' [t<5] / { t = t+1; };
+
+            -> GreenN: 'tick' [t=5] / { t = 0; };
+        }
+    }
+
+    composite state Broken {
+        -> Normal: 'repair';
+        INITIAL -> OrangeB;
+
+        state OrangeB {
+            -> None: 'tick';
+        }
+
+        state None {
+            -> OrangeB: 'tick';
+        }
+    }
+}

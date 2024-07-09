@@ -25,7 +25,7 @@ StateMachine SlotMachine {
                 g = g + (i*5);
                 i = 0;
             ];
-            -> Lost ['win' / 
+            -> Lost ['lose' / 
                 i = 0;
             ];
         }

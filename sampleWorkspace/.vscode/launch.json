@@ -7,61 +7,32 @@
         {
             "type": "configurable",
             "request": "launch",
-            "name": "Launch Sample State Machine",
-            "sourceFile": "${workspaceFolder}/sample.stmch",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [
-                "stateReached"
-            ]
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch Sample Arithmetic State Machine",
-            "sourceFile": "${workspaceFolder}/sample_arithmetic.stmch",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "pauseOnEnd": true,
-            "enabledBreakpointTypeIds": [
-                "stateReached"
-            ]
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch Non-Deterministic State Machine",
-            "sourceFile": "${workspaceFolder}/non-deterministic.stmch",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "enabledBreakpointTypeIds": [
-                "stateReached"
-            ]
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
             "name": "Launch Slot State Machine",
             "sourceFile": "${workspaceFolder}/slot.stmch",
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
-            "pauseOnEnd": true,
-            "enabledBreakpointTypeIds": [
-                "stateReached"
-            ]
+            "pauseOnEnd": true
         },
         {
             "type": "configurable",
             "request": "launch",
-            "name": "Launch Loop State Machine",
-            "sourceFile": "${workspaceFolder}/loop.stmch",
+            "name": "Launch Simple Lights State Machine",
+            "sourceFile": "${workspaceFolder}/simple_lights.stmch",
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
-            "pauseOnStart": true
+            "pauseOnStart": true,
+            "pauseOnEnd": true
+        },
+        {
+            "type": "configurable",
+            "request": "launch",
+            "name": "Launch Complex Lights State Machine",
+            "sourceFile": "${workspaceFolder}/complex_lights.stmch",
+            "configurableDebuggerPort": 49153,
+            "languageRuntimePort": 49152,
+            "pauseOnStart": true,
+            "pauseOnEnd": true
         },
         {
             "type": "configurable",
@@ -71,37 +42,6 @@
             "configurableDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch Petri Net 1",
-            "sourceFile": "${workspaceFolder}/test1.PetriNet",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch Petri Net 2",
-            "sourceFile": "${workspaceFolder}/test2.PetriNet",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-        },
-        {
-            "type": "configurable",
-            "request": "launch",
-            "name": "Launch Petri Net 3",
-            "sourceFile": "${workspaceFolder}/test3.PetriNet",
-            "configurableDebuggerPort": 49153,
-            "languageRuntimePort": 49152,
-            "pauseOnStart": true,
-            "pauseOnEnd": true,
-            "enabledBreakpointTypeIds": [
-                "Transition.trigger"
-            ]
         }
     ]
 }
