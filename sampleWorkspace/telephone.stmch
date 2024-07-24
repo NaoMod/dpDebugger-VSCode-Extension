@@ -2,54 +2,48 @@ StateMachine Telephone {
     INITIAL -> Idle;
 
     state Idle {
-        -> Active ['liftReceiver' / 'getDialTone'];
+        -> Active: 'liftReceiver';
     }
 
     composite state Active {
-        -> Idle ['callerHangsUp'];
-        -> FINAL ['terminate'];
-
         INITIAL -> DialTone;
 
+        -> Idle: 'callerHangsUp';
+        -> FINAL: 'terminate';
+
         state DialTone {
-            -> TimeOut ['after'];
-            -> Dialing ['dialDigit'];
+            -> TimeOut: 'after';
+            -> Dialing: 'dialDigit';
         }
 
-        state TimeOut {
-
-        }
+        state TimeOut { }
 
         state Dialing {
-            -> TimeOut ['after'];
-            -> Invalid ['dialDigitInvalid'];
-            -> Dialing ['dialDigitIncomplete'];
-            -> Connecting ['dialDigitValid'];
+            -> TimeOut: 'after';
+            -> Invalid: 'dialDigitInvalid';
+            -> Dialing: 'dialDigitIncomplete';
+            -> Connecting: 'dialDigitValid';
         }
 
-        state Invalid {
-        
-        }
+        state Invalid { }
 
         state Connecting {
-            -> Busy ['busy'];
-            -> Ringing ['connected'];
+            -> Busy: 'busy';
+            -> Ringing: 'connected';
         }
 
-        state Busy {
-        
-        }
+        state Busy { }
 
         state Ringing {
-            -> Talking ['calleeAnswers'];
+            -> Talking: 'calleeAnswers';
         }
 
         state Talking {
-            -> Pinned ['calleeHangsUp'];
+            -> Pinned: 'calleeHangsUp';
         }
 
         state Pinned {
-            -> Talking ['calleeAnswers'];
+            -> Talking: 'calleeAnswers';
         }
     }
 }

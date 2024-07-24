@@ -29,7 +29,6 @@ StateMachine ComplexLights {
     }
 
     composite state Broken {
-        -> Normal: 'repair';
         INITIAL -> OrangeB;
 
         state OrangeB {

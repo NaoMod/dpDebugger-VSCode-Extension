@@ -18,6 +18,6 @@ export async function activate(context: ExtensionContext) {
 class GenericDebugAdapterServerDescriptorFactory implements vscode.DebugAdapterDescriptorFactory {
 
     public createDebugAdapterDescriptor(session: vscode.DebugSession, executable: vscode.DebugAdapterExecutable | undefined): vscode.ProviderResult<vscode.DebugAdapterDescriptor> {
-        return new vscode.DebugAdapterServer(session.configuration.configurableDebuggerPort);
+        return new vscode.DebugAdapterServer(session.configuration.dpDebuggerPort);
     }
 }

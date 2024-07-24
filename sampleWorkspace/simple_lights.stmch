@@ -1,9 +1,4 @@
 StateMachine SimpleLights {
-    INITIAL -> Idle;
-
-    state Idle {
-        -> Green: 't' / {t=0;};
-    }
 
     state Green {
         -> Green: 'tick' [t<5] / { t = t+1; };
@@ -12,7 +7,7 @@ StateMachine SimpleLights {
     }
 
     state Orange {
-        -> Orange: 'tick' [t<5] / { t = t+1; };
+        -> Orange: 'tick' [t<5] / { t = t-1; };
 
         -> Red: 'tick' [t=5] / { t = 0; };
     }

@@ -1,5 +1,5 @@
 {
-  "name": "configurable-debugger-vscode-extension",
+  "name": "dpdebugger-vscode-extension",
   "version": "1.0.0",
   "description": "",
   "publisher": "naomod",
@@ -14,8 +14,8 @@
     "Debuggers"
   ],
   "activationEvents": [
-    "onDebugResolve:configurable",
-    "onDebugDynamicConfigurations:configurable"
+    "onDebugResolve:dpDebugger",
+    "onDebugDynamicConfigurations:dpDebugger"
   ],
   "contributes": {
     "views": {
@@ -114,8 +114,8 @@
     },
     "debuggers": [
       {
-        "type": "configurable",
-        "label": "Configurable Debug",
+        "type": "dpdebugger",
+        "label": "dpDebugger",
         "program": "../debugger/out/main.js",
         "runtime": "node",
         "configurationAttributes": {
@@ -130,9 +130,9 @@
                 "description": "Absolute path to a text file.",
                 "default": "${workspaceFolder}/"
               },
-              "configurableDebuggerPort": {
+              "dpDebuggerPort": {
                 "type": "number",
-                "description": "Port on which the configurable debugger is listening.",
+                "description": "Port on which dpDebugger is listening.",
                 "default": 49153
               },
               "languageRuntimePort": {
@@ -159,11 +159,11 @@
         },
         "initialConfigurations": [
           {
-            "type": "configurable",
+            "type": "dpdebugger",
             "request": "launch",
             "name": "Launch Program",
             "sourceFile": "${workspaceFolder}/",
-            "configurableDebuggerPort": 49153,
+            "dpDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "additionalArgs": {}
@@ -171,14 +171,14 @@
         ],
         "configurationSnippets": [
           {
-            "label": "Configurable Debug: Launch",
-            "description": "A new configuration for launching a configurable debug program",
+            "label": "dpDebugger: Launch",
+            "description": "A new configuration for launching a debug session with dpDebugger",
             "body": {
-              "type": "configurable",
+              "type": "dpdebugger",
               "request": "launch",
               "name": "${2:Launch Program}",
               "sourceFile": "^\"\\${workspaceFolder}/\"",
-              "configurableDebuggerPort": 49153,
+              "dpDebuggerPort": 49153,
               "languageRuntimePort": 49152,
               "pauseOnStart": true,
               "enabledBreakpointTypeIds": [],

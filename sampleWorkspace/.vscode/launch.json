@@ -5,41 +5,41 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "configurable",
+            "type": "dpdebugger",
             "request": "launch",
             "name": "Launch Slot State Machine",
             "sourceFile": "${workspaceFolder}/slot.stmch",
-            "configurableDebuggerPort": 49153,
+            "dpDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "pauseOnEnd": true
         },
         {
-            "type": "configurable",
+            "type": "dpdebugger",
             "request": "launch",
             "name": "Launch Simple Lights State Machine",
             "sourceFile": "${workspaceFolder}/simple_lights.stmch",
-            "configurableDebuggerPort": 49153,
+            "dpDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "pauseOnEnd": true
         },
         {
-            "type": "configurable",
+            "type": "dpdebugger",
             "request": "launch",
             "name": "Launch Complex Lights State Machine",
             "sourceFile": "${workspaceFolder}/complex_lights.stmch",
-            "configurableDebuggerPort": 49153,
+            "dpDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true,
             "pauseOnEnd": true
         },
         {
-            "type": "configurable",
+            "type": "dpdebugger",
             "request": "launch",
             "name": "Launch Telephone State Machine",
             "sourceFile": "${workspaceFolder}/telephone.stmch",
-            "configurableDebuggerPort": 49153,
+            "dpDebuggerPort": 49153,
             "languageRuntimePort": 49152,
             "pauseOnStart": true
         }

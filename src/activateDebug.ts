@@ -29,12 +29,12 @@ export class DebugSetup {
 
         this.registerCommands(context);
 
-        context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('configurable', factory));
+        context.subscriptions.push(vscode.debug.registerDebugAdapterDescriptorFactory('dpdebugger', factory));
     }
 
     private registerTrackers(context: vscode.ExtensionContext, ...trackers: vscode.DebugAdapterTrackerFactory[]) {
         for (const tracker of trackers) {
-            context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('configurable', tracker));
+            context.subscriptions.push(vscode.debug.registerDebugAdapterTrackerFactory('dpdebugger', tracker));
         }
     }
 
