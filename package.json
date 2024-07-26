@@ -14,8 +14,8 @@
     "Debuggers"
   ],
   "activationEvents": [
-    "onDebugResolve:dpDebugger",
-    "onDebugDynamicConfigurations:dpDebugger"
+    "onDebugResolve:dpdebugger",
+    "onDebugDynamicConfigurations:dpdebugger"
   ],
   "contributes": {
     "views": {
