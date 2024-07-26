@@ -1,4 +1,9 @@
 StateMachine SimpleLights {
+    INITIAL -> Idle;
+
+    state Idle {
+        -> Green: 'start' / { t = 0; };
+    }
 
     state Green {
         -> Green: 'tick' [t<5] / { t = t+1; };
